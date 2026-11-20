@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import { Suspense } from 'react'
+import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { CREATE_INVOICE_PATH } from '@/lib/routes'
@@ -65,6 +66,7 @@ export default function RootLayout({
             {children}
           </ClerkProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
