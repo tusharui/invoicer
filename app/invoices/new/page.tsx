@@ -23,7 +23,7 @@ export default async function NewInvoicePage() {
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-black sm:text-4xl dark:text-white">
             Create invoice
           </h1>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="mt-2 text-base text-zinc-600 dark:text-zinc-300">
             Fill in the details below and your invoice will be saved to your
             account.
           </p>

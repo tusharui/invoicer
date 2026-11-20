@@ -28,7 +28,7 @@ const sectionClass =
   "rounded-2xl border border-black/10 bg-white p-5 shadow-sm sm:p-6 dark:border-white/10 dark:bg-black dark:shadow-none";
 
 const headingClass =
-  "mb-5 text-sm font-semibold tracking-tight text-black dark:text-white";
+  "mb-2 text-[30px] font-semibold tracking-tight text-black dark:text-white";
 
 function newItem(): Item {
   return {
@@ -85,6 +85,7 @@ export function CreateInvoiceForm({ defaultIssueDate, defaultDueDate }: Props) {
       current.map((item) => (item.id === id ? { ...item, ...patch } : item)),
     );
   }
+
 
   return (
     <form action={formAction} className="space-y-6">
@@ -412,7 +413,7 @@ export function CreateInvoiceForm({ defaultIssueDate, defaultDueDate }: Props) {
         <button
           type="submit"
           disabled={isPending}
-          className="h-12 rounded-full bg-black px-8 text-sm font-semibold text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
+          className="h-10 rounded-full bg-black px-4 text-lg  text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
         >
           {isPending ? "Creating…" : "Create invoice"}
         </button>

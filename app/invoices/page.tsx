@@ -71,7 +71,7 @@ export default async function InvoicesPage() {
       ) : (
         <div className="overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
           <table className="w-full text-left text-sm">
-            <thead className="bg-black font-mono text-[10px] uppercase tracking-widest text-white">
+            <thead className="bg-black font-mono text-[10px] uppercase tracking-widest text-white dark:bg-white dark:text-black">
               <tr>
                 <th className="px-5 py-3 font-semibold">Number</th>
                 <th className="px-5 py-3 font-semibold">Client</th>
@@ -105,7 +105,7 @@ export default async function InvoicesPage() {
                     {formatDate(invoice.dueDate)}
                   </td>
                   <td className="px-5 py-4">
-                    <span className="rounded-full bg-black px-2.5 py-1 text-xs font-medium text-white">
+                    <span className="rounded-full bg-black px-2.5 py-1 text-xs font-medium text-white dark:bg-white dark:text-black">
                       {invoice.status.toLowerCase()}
                     </span>
                   </td>

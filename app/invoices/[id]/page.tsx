@@ -76,7 +76,7 @@ export default async function InvoiceDetailPage({
           </p>
         </div>
         <div className="flex flex-col items-end gap-3">
-          <span className="rounded-full bg-black px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white">
+          <span className="rounded-full bg-black px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white dark:bg-white dark:text-black">
             {invoice.status.toLowerCase()}
           </span>
           <DownloadInvoiceButton
@@ -146,7 +146,7 @@ export default async function InvoiceDetailPage({
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
         <table className="w-full text-left text-sm">
-          <thead className="bg-black font-mono text-[10px] uppercase tracking-widest text-white">
+          <thead className="bg-black font-mono text-[10px] uppercase tracking-widest text-white dark:bg-white dark:text-black">
             <tr>
               <th className="px-5 py-3 font-semibold">Description</th>
               <th className="px-5 py-3 text-right font-semibold">Qty</th>
