@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { CreateInvoiceForm } from "@/components/invoice/create-invoice-form";
 import { monoLabelClass } from "@/lib/utils";
 
@@ -11,6 +12,9 @@ export default async function NewInvoicePage() {
   // Middleware already guards this route; check again on the server.
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
+
+  // Opt out of prerendering before reading the current time.
+  await connection();
 
   const today = new Date();
   const due = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
