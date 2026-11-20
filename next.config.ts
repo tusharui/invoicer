@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   },
   cacheComponents: true,
   partialPrefetching: true,
+  serverExternalPackages: ["pdfkit", "nodemailer"],
   turbopack: {
     rules: {
       "*.css": {

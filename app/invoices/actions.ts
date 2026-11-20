@@ -1,12 +1,32 @@
 'use server';
 
 import { auth, currentUser } from '@clerk/nextjs/server';
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/prisma';
+import { generateInvoicePdf } from '@/lib/invoice-pdf';
 
 export type CreateInvoiceState = {
   error?: string;
 };
+
+export type SendInvoiceState = {
+  error?: string;
+  success?: string;
+};
+
+function jsonRecord(value: unknown): Record<string, string> {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        entry == null ? '' : String(entry),
+      ]),
+    );
+  }
+  return {};
+}
 
 type LineItem = {
   description: string;
@@ -228,4 +248,148 @@ export async function createInvoice(
   }
 
   redirect(`/invoices/${invoiceId}`);
+}
+
+export async function sendInvoice(
+  _previousState: SendInvoiceState,
+  formData: FormData,
+): Promise<SendInvoiceState> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) {
+    return { error: 'Please sign in to send an invoice.' };
+  }
+
+  const invoiceId = text(formData.get('invoiceId'));
+  const recipient = text(formData.get('email'));
+  if (!invoiceId) {
+    return { error: 'Invoice not found.' };
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) {
+    return { error: 'Enter a valid recipient email address.' };
+  }
+
+  const dbUser = await prisma.user.findUnique({ where: { clerkId } });
+  if (!dbUser) {
+    return { error: 'Account not found.' };
+  }
+
+  const invoice = await prisma.invoice.findFirst({
+    where: { id: invoiceId, userId: dbUser.id },
+    include: { items: { orderBy: { position: 'asc' } } },
+  });
+  if (!invoice) {
+    return { error: 'Invoice not found.' };
+  }
+  if (invoice.status === 'SENT') {
+    return { error: 'This invoice has already been sent.' };
+  }
+
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPassword = process.env.GMAIL_APP_PASSWORD;
+  if (!gmailUser || !gmailPassword) {
+    return {
+      error:
+        'Email is not configured yet. Add GMAIL_USER and GMAIL_APP_PASSWORD to .env and restart the server.',
+    };
+  }
+
+  const from = jsonRecord(invoice.fromSnapshot);
+  const to = jsonRecord(invoice.toSnapshot);
+  const displayDate = (value: Date) =>
+    value.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+
+  try {
+    const pdf = await generateInvoicePdf({
+      number: invoice.number,
+      status: invoice.status,
+      issueDate: displayDate(invoice.issueDate),
+      dueDate: displayDate(invoice.dueDate),
+      currency: invoice.currency,
+      from: {
+        name: from.name,
+        email: from.email,
+        addressLine1: from.addressLine1,
+      },
+      to: {
+        name: to.name,
+        company: to.company,
+        email: to.email,
+        addressLine1: to.addressLine1,
+      },
+      items: invoice.items.map((item) => ({
+        description: item.description,
+        quantity: String(item.quantity),
+        unitPrice: String(item.unitPrice),
+        taxRate: String(item.taxRate),
+        amount: String(item.amount),
+      })),
+      subtotal: String(invoice.subtotal),
+      taxAmount: String(invoice.taxAmount),
+      discountAmount: String(invoice.discountAmount),
+      total: String(invoice.total),
+      notes: invoice.notes,
+      terms: invoice.terms,
+    });
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: gmailUser,
+        pass: gmailPassword,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Invoicer" <${gmailUser}>`,
+      to: recipient,
+      subject: `Invoice ${invoice.number} from ${from.name || 'Invoicer'}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;color:#111;max-width:600px;margin:auto">
+          <h1 style="font-size:24px;margin:0 0 8px">Invoice ${invoice.number}</h1>
+          <p style="color:#555;font-size:14px;margin:0 0 24px">
+            Issued ${displayDate(invoice.issueDate)} · Due ${displayDate(invoice.dueDate)}
+          </p>
+          <p style="font-size:14px;line-height:1.6">
+            Hi ${to.name || 'there'},<br /><br />
+            Please find invoice <strong>${invoice.number}</strong> attached.
+            The total due is <strong>${invoice.currency} ${Number(invoice.total).toFixed(2)}</strong>,
+            payable by ${displayDate(invoice.dueDate)}.
+          </p>
+          <p style="color:#555;font-size:13px;margin-top:32px">
+            Sent by ${from.name || 'Invoicer'}${from.email ? ` (${from.email})` : ''}.
+          </p>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `invoice-${invoice.number}.pdf`,
+          content: pdf,
+          contentType: 'application/pdf',
+        },
+      ],
+    });
+
+    await prisma.invoice.update({
+      where: { id: invoice.id },
+      data: { status: 'SENT', sentAt: new Date() },
+    });
+    await prisma.invoiceActivity.create({
+      data: {
+        invoiceId: invoice.id,
+        type: 'SENT',
+        message: `Invoice sent to ${recipient}.`,
+      },
+    });
+    revalidatePath('/invoices');
+    revalidatePath(`/invoices/${invoice.id}`);
+
+    return { success: `Invoice sent to ${recipient}.` };
+  } catch (error) {
+    console.error('Failed to send invoice', error);
+    return { error: 'Could not send the invoice. Please try again.' };
+  }
 }

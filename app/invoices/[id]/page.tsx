@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { monoLabelClass } from "@/lib/utils";
 import { DownloadInvoiceButton } from "@/components/invoice/download-invoice-button";
+import { SendInvoiceButton } from "@/components/invoice/send-invoice-button";
 
 // Reads the Clerk session (cookies) on every request.
 export const instant = false;
@@ -79,6 +80,11 @@ export default async function InvoiceDetailPage({
           <span className="rounded-full bg-black px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white dark:bg-white dark:text-black">
             {invoice.status.toLowerCase()}
           </span>
+          <SendInvoiceButton
+            invoiceId={invoice.id}
+            defaultEmail={to.email}
+            sent={invoice.status === 'SENT'}
+          />
           <DownloadInvoiceButton
             number={invoice.number}
             status={invoice.status}
