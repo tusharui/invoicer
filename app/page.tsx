@@ -1,7 +1,6 @@
-import { SignUpButton } from "@clerk/nextjs";
 import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { HeroWave } from "@/components/hero-wave";
+import { GetStartedButton } from "@/components/get-started-button";
 
 export default function Home() {
   return (
@@ -36,14 +35,7 @@ export default function Home() {
             className="hero-reveal mt-10 flex w-full max-w-[280px] flex-col items-center justify-center gap-3 sm:w-auto sm:max-w-none sm:flex-row"
             style={{ animationDelay: "150ms" }}
           >
-            <SignUpButton mode="modal">
-              <ShimmerButton
-                type="button"
-                className="h-12 w-full text-xl font-semibold sm:w-[184px]"
-              >
-                Get Started
-              </ShimmerButton>
-            </SignUpButton>
+            <GetStartedButton />
           </div>
         </section>
       </main>

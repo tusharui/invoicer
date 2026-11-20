@@ -25,8 +25,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ClerkProvider>
-            <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-black/10 px-4 sm:px-6 lg:px-8 dark:border-white/10">
-              <span className="text-lg font-semibold tracking-tight text-black sm:text-xl dark:text-white">
+            <header className="mx-auto mt-3 flex h-11 w-fit max-w-full shrink-0 items-center justify-start gap-48 rounded-full border border-black/10 bg-white/80 px-3 shadow-sm backdrop-blur-md sm:px-4 dark:border-white/15 dark:bg-white/5 dark:shadow-none">
+              <span className="pl-1 text-base font-semibold tracking-tight text-black sm:text-lg dark:text-white">
                 Invoicer
               </span>
               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -37,7 +37,7 @@ export default function RootLayout({
                       <SignInButton mode="modal">
                         <button
                           type="button"
-                          className="h-9 cursor-pointer rounded-full border border-black/20 bg-white px-3 text-xs font-medium text-black transition-all duration-200 ease-out hover:border-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:w-[92px] sm:text-sm dark:border-white/25 dark:bg-white/5 dark:text-white dark:hover:border-white dark:focus-visible:ring-white/30"
+                          className="h-8 cursor-pointer rounded-full border border-black/20 bg-white px-3 text-xs font-medium text-black transition-all duration-200 ease-out hover:border-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:w-[84px] sm:text-sm dark:border-white/25 dark:bg-white/5 dark:text-white dark:hover:border-white dark:focus-visible:ring-white/30"
                         >
                           Sign in
                         </button>
@@ -45,7 +45,7 @@ export default function RootLayout({
                       <SignUpButton mode="modal">
                         <button
                           type="button"
-                          className="h-9 cursor-pointer rounded-full bg-black px-3 text-xs font-medium text-white transition-all duration-200 ease-out hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:w-[92px] sm:text-sm dark:bg-white dark:text-black dark:hover:bg-zinc-200 dark:focus-visible:ring-white/30"
+                          className="h-8 cursor-pointer rounded-full bg-black px-3 text-xs font-medium text-white transition-all duration-200 ease-out hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:w-[84px] sm:text-sm dark:bg-white dark:text-black dark:hover:bg-zinc-200 dark:focus-visible:ring-white/30"
                         >
                           Sign up
                         </button>
