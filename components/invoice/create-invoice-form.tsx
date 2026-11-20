@@ -69,13 +69,12 @@ export function CreateInvoiceForm({ defaultIssueDate, defaultDueDate }: Props) {
           100,
       0,
     );
-    const discountValue = Math.min(
-      Math.max(Number(discount || 0), 0),
-      subtotal + tax,
-    );
+    const discountPercent = Math.min(Math.max(Number(discount || 0), 0), 100);
+    const discountValue = Math.round((subtotal + tax) * discountPercent) / 100;
     return {
       subtotal,
       tax,
+      discountPercent,
       discount: discountValue,
       total: subtotal + tax - discountValue,
     };
@@ -253,14 +252,16 @@ export function CreateInvoiceForm({ defaultIssueDate, defaultDueDate }: Props) {
           </div>
           <div>
             <label className={labelClass} htmlFor="discount">
-              Discount
+              Discount (%)
             </label>
             <input
               id="discount"
               name="discount"
               type="number"
               min="0"
+              max="100"
               step="0.01"
+              placeholder="0"
               value={discount}
               onChange={(event) => setDiscount(event.target.value)}
               className={inputClass}
@@ -374,7 +375,7 @@ export function CreateInvoiceForm({ defaultIssueDate, defaultDueDate }: Props) {
               <dd>{money(totals.tax)}</dd>
             </div>
             <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
-              <dt>Discount</dt>
+              <dt>Discount ({totals.discountPercent}%)</dt>
               <dd>-{money(totals.discount)}</dd>
             </div>
             <div className="flex justify-between border-t border-black/10 pt-2 text-base font-semibold text-black dark:border-white/10 dark:text-white">

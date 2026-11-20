@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { monoLabelClass } from "@/lib/utils";
+import { DownloadInvoiceButton } from "@/components/invoice/download-invoice-button";
 
 // Reads the Clerk session (cookies) on every request.
 export const instant = false;
@@ -74,9 +75,42 @@ export default async function InvoiceDetailPage({
             {formatDate(invoice.dueDate)}
           </p>
         </div>
-        <span className="rounded-full bg-black px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white">
-          {invoice.status.toLowerCase()}
-        </span>
+        <div className="flex flex-col items-end gap-3">
+          <span className="rounded-full bg-black px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white">
+            {invoice.status.toLowerCase()}
+          </span>
+          <DownloadInvoiceButton
+            number={invoice.number}
+            status={invoice.status}
+            issueDate={formatDate(invoice.issueDate)}
+            dueDate={formatDate(invoice.dueDate)}
+            currency={invoice.currency}
+            from={{
+              name: from.name,
+              email: from.email,
+              addressLine1: from.addressLine1,
+            }}
+            to={{
+              name: to.name,
+              company: to.company,
+              email: to.email,
+              addressLine1: to.addressLine1,
+            }}
+            items={invoice.items.map((item) => ({
+              description: item.description,
+              quantity: String(item.quantity),
+              unitPrice: String(item.unitPrice),
+              taxRate: String(item.taxRate),
+              amount: String(item.amount),
+            }))}
+            subtotal={String(invoice.subtotal)}
+            taxAmount={String(invoice.taxAmount)}
+            discountAmount={String(invoice.discountAmount)}
+            total={String(invoice.total)}
+            notes={invoice.notes}
+            terms={invoice.terms}
+          />
+        </div>
       </div>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">

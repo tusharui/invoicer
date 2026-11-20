@@ -81,7 +81,11 @@ export async function createInvoice(
       0,
     ),
   );
-  const discount = round2(Math.min(Math.max(number(formData.get('discount'), 0), 0), subtotal + taxAmount));
+  const discountPercent = Math.min(
+    Math.max(number(formData.get('discount'), 0), 0),
+    100,
+  );
+  const discount = round2(((subtotal + taxAmount) * discountPercent) / 100);
   const total = round2(subtotal + taxAmount - discount);
 
   const clerkUser = await currentUser();
