@@ -305,7 +305,6 @@ export async function sendInvoice(
   try {
     const pdf = await generateInvoicePdf({
       number: invoice.number,
-      status: invoice.status,
       issueDate: displayDate(invoice.issueDate),
       dueDate: displayDate(invoice.dueDate),
       currency: invoice.currency,

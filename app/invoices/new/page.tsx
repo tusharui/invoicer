@@ -30,7 +30,7 @@ export default async function NewInvoicePage() {
         </div>
         <Link
           href="/invoices"
-          className="text-sm font-medium text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-300"
+          className="text-base font-medium text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-300"
         >
           View all invoices
         </Link>

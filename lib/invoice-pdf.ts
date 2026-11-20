@@ -2,7 +2,6 @@ import PDFDocument from "pdfkit";
 
 export type InvoicePdfData = {
   number: string;
-  status: string;
   issueDate: string;
   dueDate: string;
   currency: string;
@@ -44,6 +43,15 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
 
     const left = 48;
     const right = doc.page.width - 48;
+    // Fixed, non-overlapping column boxes (x + width). Every value is
+    // right-aligned inside its own box so nothing runs into the next column.
+    const col = {
+      description: { x: left, width: 230 },
+      qty: { x: 285, width: 40 },
+      rate: { x: 335, width: 70 },
+      tax: { x: 415, width: 50 },
+      amount: { x: 475, width: right - 475 },
+    };
     let y = 48;
 
     doc.fillColor("#000000").font("Helvetica-Bold").fontSize(28);
@@ -56,7 +64,7 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
 
     doc.font("Helvetica").fontSize(10).fillColor("#444444");
     doc.text(
-      `STATUS: ${data.status.toUpperCase()}    |    Issued ${data.issueDate}    |    Due ${data.dueDate}`,
+      `Issued ${data.issueDate}    |    Due ${data.dueDate}`,
       left,
       y,
     );
@@ -78,11 +86,11 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
       doc.font("Helvetica-Bold").fontSize(8).fillColor("#666666");
       doc.text(title, x, y);
       doc.font("Helvetica-Bold").fontSize(12).fillColor("#000000");
-      doc.text(value.name || "-", x, y + 16);
+      doc.text(value.name || "-", x, y + 16, { width: 250 });
       doc.font("Helvetica").fontSize(10).fillColor("#444444");
       const secondary = [value.company, value.email].filter(Boolean).join(" | ");
-      if (secondary) doc.text(secondary, x, y + 34);
-      if (value.addressLine1) doc.text(value.addressLine1, x, y + 50);
+      if (secondary) doc.text(secondary, x, y + 34, { width: 250 });
+      if (value.addressLine1) doc.text(value.addressLine1, x, y + 50, { width: 250 });
     };
 
     party("BILL FROM", data.from, left);
@@ -94,11 +102,23 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
 
     const header = (atY: number) => {
       doc.font("Helvetica-Bold").fontSize(8).fillColor("#666666");
-      doc.text("DESCRIPTION", left, atY);
-      doc.text("QTY", 390, atY, { width: 45, align: "right" });
-      doc.text("RATE", 445, atY, { width: 55, align: "right" });
-      doc.text("TAX", 510, atY, { width: 40, align: "right" });
-      doc.text("AMOUNT", right - 70, atY, { width: 70, align: "right" });
+      doc.text("DESCRIPTION", col.description.x, atY);
+      doc.text("QTY", col.qty.x, atY, {
+        width: col.qty.width,
+        align: "right",
+      });
+      doc.text("RATE", col.rate.x, atY, {
+        width: col.rate.width,
+        align: "right",
+      });
+      doc.text("TAX %", col.tax.x, atY, {
+        width: col.tax.width,
+        align: "right",
+      });
+      doc.text("AMOUNT", col.amount.x, atY, {
+        width: col.amount.width,
+        align: "right",
+      });
     };
     header(y);
     y += 16;
@@ -113,19 +133,24 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
         y += 30;
       }
       doc.font("Helvetica").fontSize(10).fillColor("#000000");
-      doc.text(item.description, left, y, { width: 320 });
-      doc.text(String(item.quantity), 390, y, { width: 45, align: "right" });
-      doc.text(amount(item.unitPrice), 445, y, {
-        width: 55,
+      doc.text(item.description, col.description.x, y, {
+        width: col.description.width,
+      });
+      doc.text(String(item.quantity), col.qty.x, y, {
+        width: col.qty.width,
         align: "right",
       });
-      doc.text(`${String(item.taxRate)}%`, 510, y, {
-        width: 40,
+      doc.text(amount(item.unitPrice), col.rate.x, y, {
+        width: col.rate.width,
+        align: "right",
+      });
+      doc.text(`${String(item.taxRate)}%`, col.tax.x, y, {
+        width: col.tax.width,
         align: "right",
       });
       doc.font("Helvetica-Bold");
-      doc.text(amount(item.amount), right - 70, y, {
-        width: 70,
+      doc.text(amount(item.amount), col.amount.x, y, {
+        width: col.amount.width,
         align: "right",
       });
       y += 22;
@@ -140,13 +165,14 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
         .font(bold ? "Helvetica-Bold" : "Helvetica")
         .fontSize(bold ? 12 : 10)
         .fillColor("#000000");
-      doc.text(label, 390, y, { width: 110, align: "right" });
-      doc.text(value, right - 100, y, { width: 100, align: "right" });
+      // Label ends at 420, value starts at 430 — a fixed 10pt gap.
+      doc.text(label, 280, y, { width: 140, align: "right" });
+      doc.text(value, 430, y, { width: right - 430, align: "right" });
       y += bold ? 24 : 18;
     };
 
     totalLine("Subtotal", amount(data.subtotal));
-    totalLine("Tax", amount(data.taxAmount));
+    totalLine("Tax amount", amount(data.taxAmount));
     totalLine("Discount", `-${amount(data.discountAmount)}`);
     totalLine(
       "Total",

@@ -20,7 +20,6 @@ type Item = {
 
 type Props = {
   number: string;
-  status: string;
   issueDate: string;
   dueDate: string;
   currency: string;
@@ -80,17 +79,17 @@ function buildInvoiceSvg(props: Props): { svg: string; height: number } {
       const y = rowsStart + index * 34;
       return `
         ${multiLine(item.description, margin, y, 'class="cell"')}
-        <text x="500" y="${y}" text-anchor="end" class="cell">${esc(item.quantity)}</text>
-        <text x="590" y="${y}" text-anchor="end" class="cell">${esc(item.unitPrice)}</text>
-        <text x="675" y="${y}" text-anchor="end" class="cell">${esc(item.taxRate)}%</text>
+        <text x="490" y="${y}" text-anchor="end" class="cell">${esc(item.quantity)}</text>
+        <text x="575" y="${y}" text-anchor="end" class="cell">${esc(item.unitPrice)}</text>
+        <text x="655" y="${y}" text-anchor="end" class="cell">${esc(item.taxRate)}%</text>
         <text x="${right}" y="${y}" text-anchor="end" class="cell strong">${esc(item.amount)}</text>
       `;
     })
     .join("");
 
   const totalRow = (label: string, value: string, y: number, strong = false) => `
-    <text x="500" y="${y}" text-anchor="end" class="${strong ? "cell strong" : "muted"}">${esc(label)}</text>
-    <text x="${right}" y="${y}" text-anchor="end" class="${strong ? "cell strong" : "cell"}">${esc(value)}</text>
+    <text x="560" y="${y}" text-anchor="end" class="${strong ? "total" : "muted"}">${esc(label)}</text>
+    <text x="${right}" y="${y}" text-anchor="end" class="${strong ? "total" : "cell"}">${esc(value)}</text>
   `;
 
   let notesY = totalsTop + 150;
@@ -107,32 +106,32 @@ function buildInvoiceSvg(props: Props): { svg: string; height: number } {
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
     <style>
-      .lbl { font-family: monospace; font-size: 12px; font-weight: bold; letter-spacing: 2px; fill: #71717a; }
-      .name { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #09090b; }
-      .muted { font-family: Arial, sans-serif; font-size: 13px; fill: #52525b; }
-      .cell { font-family: Arial, sans-serif; font-size: 13px; fill: #27272a; }
-      .strong { font-weight: bold; fill: #09090b; }
-      .head { font-family: monospace; font-size: 12px; font-weight: bold; letter-spacing: 1px; fill: #71717a; }
+      .lbl { font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: bold; letter-spacing: 2px; fill: #000000; }
+      .name { font-family: 'Geist Mono', monospace; font-size: 18px; font-weight: bold; fill: #000000; }
+      .muted { font-family: 'Geist Mono', monospace; font-size: 15px; fill: #000000; }
+      .cell { font-family: 'Geist Mono', monospace; font-size: 15px; fill: #000000; }
+      .strong { font-weight: bold; fill: #000000; }
+      .total { font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: bold; fill: #000000; }
+      .head { font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: bold; letter-spacing: 1px; fill: #000000; }
     </style>
     <rect width="${width}" height="${height}" fill="#ffffff" />
-    <text x="${margin}" y="70" font-family="Arial, sans-serif" font-size="36" font-weight="bold" letter-spacing="2" fill="#09090b">INVOICE</text>
-    <text x="${margin}" y="104" font-family="monospace" font-size="18" font-weight="bold" fill="#09090b">${esc(props.number)}</text>
-    <text x="${margin}" y="132" font-family="monospace" font-size="12" letter-spacing="1" fill="#52525b">STATUS: ${esc(props.status.toUpperCase())}</text>
-    <text x="${margin}" y="160" font-family="Arial, sans-serif" font-size="13" fill="#52525b">Issued ${esc(props.issueDate)}   ·   Due ${esc(props.dueDate)}</text>
-    <line x1="${margin}" y1="182" x2="${right}" y2="182" stroke="#e4e4e7" stroke-width="1" />
+    <text x="${margin}" y="70" font-family="Geist Mono, monospace" font-size="38" font-weight="bold" letter-spacing="2" fill="#000000">INVOICE</text>
+    <text x="${margin}" y="104" font-family="Geist Mono, monospace" font-size="20" font-weight="bold" fill="#000000">${esc(props.number)}</text>
+    <text x="${margin}" y="160" font-family="Geist Mono, monospace" font-size="15" fill="#000000">Issued ${esc(props.issueDate)}   ·   Due ${esc(props.dueDate)}</text>
+    <line x1="${margin}" y1="182" x2="${right}" y2="182" stroke="#000000" stroke-width="1" />
     ${partyBlock(props.from, margin)}
     ${partyBlock(props.to, 430)}
-    <line x1="${margin}" y1="320" x2="${right}" y2="320" stroke="#e4e4e7" stroke-width="1" />
+    <line x1="${margin}" y1="320" x2="${right}" y2="320" stroke="#000000" stroke-width="1" />
     <text x="${margin}" y="350" class="head">DESCRIPTION</text>
-    <text x="500" y="350" text-anchor="end" class="head">QTY</text>
-    <text x="590" y="350" text-anchor="end" class="head">RATE</text>
-    <text x="675" y="350" text-anchor="end" class="head">TAX</text>
+    <text x="490" y="350" text-anchor="end" class="head">QTY</text>
+    <text x="575" y="350" text-anchor="end" class="head">RATE</text>
+    <text x="655" y="350" text-anchor="end" class="head">TAX %</text>
     <text x="${right}" y="350" text-anchor="end" class="head">AMOUNT</text>
-    <line x1="${margin}" y1="366" x2="${right}" y2="366" stroke="#09090b" stroke-width="1" />
+    <line x1="${margin}" y1="366" x2="${right}" y2="366" stroke="#000000" stroke-width="1" />
     ${rows}
-    <line x1="${margin}" y1="${rowsEnd + 4}" x2="${right}" y2="${rowsEnd + 4}" stroke="#e4e4e7" stroke-width="1" />
+    <line x1="${margin}" y1="${rowsEnd + 4}" x2="${right}" y2="${rowsEnd + 4}" stroke="#000000" stroke-width="1" />
     ${totalRow("Subtotal", props.subtotal, totalsTop + 10)}
-    ${totalRow("Tax", props.taxAmount, totalsTop + 40)}
+    ${totalRow("Tax amount", props.taxAmount, totalsTop + 40)}
     ${totalRow("Discount", `-${props.discountAmount}`, totalsTop + 70)}
     ${totalRow("Total", `${props.currency} ${props.total}`, totalsTop + 110, true)}
     ${notesBlock}
@@ -145,11 +144,23 @@ export function DownloadInvoiceButton(props: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function download() {
+  async function download() {
     setBusy(true);
     setError(null);
 
     try {
+      // Make sure Geist Mono is loaded before the SVG is rasterized to PNG,
+      // otherwise the canvas falls back to a generic monospace font.
+      if (document.fonts?.load) {
+        try {
+          await document.fonts.load("12px 'Geist Mono'");
+          await document.fonts.load("700 12px 'Geist Mono'");
+          await document.fonts.ready;
+        } catch {
+          // Fall back to the generic monospace stack.
+        }
+      }
+
       const { svg, height } = buildInvoiceSvg(props);
       const svgUrl = URL.createObjectURL(
         new Blob([svg], { type: "image/svg+xml;charset=utf-8" }),

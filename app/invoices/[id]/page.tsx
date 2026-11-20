@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { monoLabelClass } from "@/lib/utils";
 import { DownloadInvoiceButton } from "@/components/invoice/download-invoice-button";
 import { SendInvoiceButton } from "@/components/invoice/send-invoice-button";
+import { Money } from "@/components/invoice/money";
 
 // Reads the Clerk session (cookies) on every request.
 export const instant = false;
@@ -61,7 +62,7 @@ export default async function InvoiceDetailPage({
     <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-12 sm:px-8 sm:py-16">
       <Link
         href="/invoices"
-        className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-300"
+        className="text-base text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-300"
       >
         ← All invoices
       </Link>
@@ -71,15 +72,12 @@ export default async function InvoiceDetailPage({
           <h1 className="text-3xl font-semibold tracking-tight text-black sm:text-4xl dark:text-white">
             Invoice {invoice.number}
           </h1>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="mt-2 text-base text-zinc-600 dark:text-zinc-300">
             Issued {formatDate(invoice.issueDate)} · Due{" "}
             {formatDate(invoice.dueDate)}
           </p>
         </div>
         <div className="flex flex-col items-end gap-3">
-          <span className="rounded-full bg-black px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white dark:bg-white dark:text-black">
-            {invoice.status.toLowerCase()}
-          </span>
           <SendInvoiceButton
             invoiceId={invoice.id}
             defaultEmail={to.email}
@@ -87,7 +85,6 @@ export default async function InvoiceDetailPage({
           />
           <DownloadInvoiceButton
             number={invoice.number}
-            status={invoice.status}
             issueDate={formatDate(invoice.issueDate)}
             dueDate={formatDate(invoice.dueDate)}
             currency={invoice.currency}
@@ -127,10 +124,10 @@ export default async function InvoiceDetailPage({
           <p className="mt-3 font-medium text-black dark:text-white">
             {from.name || "—"}
           </p>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="mt-1 text-base text-zinc-600 dark:text-zinc-300">
             {from.email}
           </p>
-          <p className="mt-1 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="mt-1 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">
             {from.addressLine1}
           </p>
         </div>
@@ -141,24 +138,28 @@ export default async function InvoiceDetailPage({
           <p className="mt-3 font-medium text-black dark:text-white">
             {to.name || "—"}
           </p>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="mt-1 text-base text-zinc-600 dark:text-zinc-300">
             {[to.company, to.email].filter(Boolean).join(" · ")}
           </p>
-          <p className="mt-1 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+          <p className="mt-1 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">
             {to.addressLine1}
           </p>
         </div>
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-base">
           <thead className="bg-black font-mono text-[10px] uppercase tracking-widest text-white dark:bg-white dark:text-black">
             <tr>
               <th className="px-5 py-3 font-semibold">Description</th>
               <th className="px-5 py-3 text-right font-semibold">Qty</th>
-              <th className="px-5 py-3 text-right font-semibold">Rate</th>
-              <th className="px-5 py-3 text-right font-semibold">Tax</th>
-              <th className="px-5 py-3 text-right font-semibold">Amount</th>
+              <th className="px-5 py-3 text-right font-semibold">
+                Rate ({invoice.currency})
+              </th>
+              <th className="px-5 py-3 text-right font-semibold">Tax %</th>
+              <th className="px-5 py-3 text-right font-semibold">
+                Amount ({invoice.currency})
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-black/5 dark:divide-white/5">
@@ -167,16 +168,16 @@ export default async function InvoiceDetailPage({
                 <td className="px-5 py-4 text-black dark:text-white">
                   {item.description}
                 </td>
-                <td className="px-5 py-4 text-right text-zinc-600 dark:text-zinc-300">
+                <td className="px-5 py-4 text-right tabular-nums text-zinc-600 dark:text-zinc-300">
                   {String(item.quantity)}
                 </td>
-                <td className="px-5 py-4 text-right text-zinc-600 dark:text-zinc-300">
+                <td className="px-5 py-4 text-right tabular-nums text-zinc-600 dark:text-zinc-300">
                   {money(item.unitPrice)}
                 </td>
-                <td className="px-5 py-4 text-right text-zinc-600 dark:text-zinc-300">
+                <td className="px-5 py-4 text-right tabular-nums text-zinc-600 dark:text-zinc-300">
                   {String(item.taxRate)}%
                 </td>
-                <td className="px-5 py-4 text-right font-medium text-black dark:text-white">
+                <td className="px-5 py-4 text-right font-medium tabular-nums text-black dark:text-white">
                   {money(item.amount)}
                 </td>
               </tr>
@@ -184,23 +185,36 @@ export default async function InvoiceDetailPage({
           </tbody>
         </table>
 
-        <dl className="ml-auto w-full max-w-xs space-y-2 border-t border-black/10 p-5 text-sm dark:border-white/10">
-          <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
+        <dl className="ml-auto w-full max-w-xs space-y-3 border-t border-black/10 p-5 text-base dark:border-white/10">
+          <div className="flex items-baseline justify-between gap-4 text-zinc-600 dark:text-zinc-300">
             <dt>Subtotal</dt>
-            <dd>{money(invoice.subtotal)}</dd>
+            <dd>
+              <Money value={invoice.subtotal} currency={invoice.currency} />
+            </dd>
           </div>
-          <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
-            <dt>Tax</dt>
-            <dd>{money(invoice.taxAmount)}</dd>
+          <div className="flex items-baseline justify-between gap-4 text-zinc-600 dark:text-zinc-300">
+            <dt>Tax amount</dt>
+            <dd>
+              <Money value={invoice.taxAmount} currency={invoice.currency} />
+            </dd>
           </div>
-          <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
+          <div className="flex items-baseline justify-between gap-4 text-zinc-600 dark:text-zinc-300">
             <dt>Discount</dt>
-            <dd>-{money(invoice.discountAmount)}</dd>
+            <dd>
+              <Money
+                value={-Number(invoice.discountAmount)}
+                currency={invoice.currency}
+              />
+            </dd>
           </div>
-          <div className="flex justify-between border-t border-black/10 pt-2 text-base font-semibold text-black dark:border-white/10 dark:text-white">
+          <div className="flex items-baseline justify-between gap-4 border-t border-black/10 pt-3 text-base font-semibold text-black dark:border-white/10 dark:text-white">
             <dt>Total</dt>
             <dd>
-              {invoice.currency} {money(invoice.total)}
+              <Money
+                value={invoice.total}
+                currency={invoice.currency}
+                className="text-lg"
+              />
             </dd>
           </div>
         </dl>
@@ -213,7 +227,7 @@ export default async function InvoiceDetailPage({
               <p className={monoLabelClass}>
                 Notes
               </p>
-              <p className="mt-2 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+              <p className="mt-2 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">
                 {invoice.notes}
               </p>
             </div>
@@ -223,7 +237,7 @@ export default async function InvoiceDetailPage({
               <p className={monoLabelClass}>
                 Terms
               </p>
-              <p className="mt-2 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+              <p className="mt-2 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">
                 {invoice.terms}
               </p>
             </div>
