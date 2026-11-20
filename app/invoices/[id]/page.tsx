@@ -1,0 +1,195 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
+import { monoLabelClass } from "@/lib/utils";
+
+// Reads the Clerk session (cookies) on every request.
+export const instant = false;
+
+function money(value: unknown): string {
+  return Number(value ?? 0).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function snapshot(value: unknown): Record<string, string> {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        entry == null ? "" : String(entry),
+      ]),
+    );
+  }
+  return {};
+}
+
+export default async function InvoiceDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) notFound();
+
+  const dbUser = await prisma.user.findUnique({ where: { clerkId } });
+  if (!dbUser) notFound();
+
+  const { id } = await params;
+  const invoice = await prisma.invoice.findFirst({
+    where: { id, userId: dbUser.id },
+    include: { items: { orderBy: { position: "asc" } }, activities: true },
+  });
+  if (!invoice) notFound();
+
+  const from = snapshot(invoice.fromSnapshot);
+  const to = snapshot(invoice.toSnapshot);
+
+  return (
+    <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-12 sm:px-8 sm:py-16">
+      <Link
+        href="/invoices"
+        className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-300"
+      >
+        ← All invoices
+      </Link>
+
+      <div className="mt-6 flex flex-wrap items-start justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight text-black sm:text-4xl dark:text-white">
+            Invoice {invoice.number}
+          </h1>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+            Issued {formatDate(invoice.issueDate)} · Due{" "}
+            {formatDate(invoice.dueDate)}
+          </p>
+        </div>
+        <span className="rounded-full bg-black px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white">
+          {invoice.status.toLowerCase()}
+        </span>
+      </div>
+
+      <div className="mt-8 grid gap-6 sm:grid-cols-2">
+        <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
+          <p className={monoLabelClass}>
+            From
+          </p>
+          <p className="mt-3 font-medium text-black dark:text-white">
+            {from.name || "—"}
+          </p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+            {from.email}
+          </p>
+          <p className="mt-1 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+            {from.addressLine1}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
+          <p className={monoLabelClass}>
+            Bill to
+          </p>
+          <p className="mt-3 font-medium text-black dark:text-white">
+            {to.name || "—"}
+          </p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+            {[to.company, to.email].filter(Boolean).join(" · ")}
+          </p>
+          <p className="mt-1 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+            {to.addressLine1}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-8 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-black font-mono text-[10px] uppercase tracking-widest text-white">
+            <tr>
+              <th className="px-5 py-3 font-semibold">Description</th>
+              <th className="px-5 py-3 text-right font-semibold">Qty</th>
+              <th className="px-5 py-3 text-right font-semibold">Rate</th>
+              <th className="px-5 py-3 text-right font-semibold">Tax</th>
+              <th className="px-5 py-3 text-right font-semibold">Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-black/5 dark:divide-white/5">
+            {invoice.items.map((item) => (
+              <tr key={item.id}>
+                <td className="px-5 py-4 text-black dark:text-white">
+                  {item.description}
+                </td>
+                <td className="px-5 py-4 text-right text-zinc-600 dark:text-zinc-300">
+                  {String(item.quantity)}
+                </td>
+                <td className="px-5 py-4 text-right text-zinc-600 dark:text-zinc-300">
+                  {money(item.unitPrice)}
+                </td>
+                <td className="px-5 py-4 text-right text-zinc-600 dark:text-zinc-300">
+                  {String(item.taxRate)}%
+                </td>
+                <td className="px-5 py-4 text-right font-medium text-black dark:text-white">
+                  {money(item.amount)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <dl className="ml-auto w-full max-w-xs space-y-2 border-t border-black/10 p-5 text-sm dark:border-white/10">
+          <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
+            <dt>Subtotal</dt>
+            <dd>{money(invoice.subtotal)}</dd>
+          </div>
+          <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
+            <dt>Tax</dt>
+            <dd>{money(invoice.taxAmount)}</dd>
+          </div>
+          <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
+            <dt>Discount</dt>
+            <dd>-{money(invoice.discountAmount)}</dd>
+          </div>
+          <div className="flex justify-between border-t border-black/10 pt-2 text-base font-semibold text-black dark:border-white/10 dark:text-white">
+            <dt>Total</dt>
+            <dd>
+              {invoice.currency} {money(invoice.total)}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      {(invoice.notes || invoice.terms) && (
+        <div className="mt-8 grid gap-6 sm:grid-cols-2">
+          {invoice.notes && (
+            <div>
+              <p className={monoLabelClass}>
+                Notes
+              </p>
+              <p className="mt-2 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+                {invoice.notes}
+              </p>
+            </div>
+          )}
+          {invoice.terms && (
+            <div>
+              <p className={monoLabelClass}>
+                Terms
+              </p>
+              <p className="mt-2 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+                {invoice.terms}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </main>
+  );
+}

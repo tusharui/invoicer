@@ -3,6 +3,7 @@ import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from '@cl
 import { Suspense } from 'react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { CREATE_INVOICE_PATH } from '@/lib/routes'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -24,7 +25,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ClerkProvider>
+          <ClerkProvider
+            signInFallbackRedirectUrl={CREATE_INVOICE_PATH}
+            signUpFallbackRedirectUrl={CREATE_INVOICE_PATH}
+          >
             <header className="mx-auto mt-3 flex h-11 w-fit max-w-full shrink-0 items-center justify-start gap-48 rounded-full border border-black/10 bg-white/80 px-3 shadow-sm backdrop-blur-md sm:px-4 dark:border-white/15 dark:bg-white/5 dark:shadow-none">
               <span className="pl-1 text-base font-semibold tracking-tight text-black sm:text-lg dark:text-white">
                 Invoicer
@@ -34,7 +38,7 @@ export default function RootLayout({
                 <Suspense>
                   <Show when="signed-out">
                     <div className="flex items-center gap-1.5 sm:gap-2">
-                      <SignInButton mode="modal">
+                      <SignInButton mode="modal" forceRedirectUrl={CREATE_INVOICE_PATH}>
                         <button
                           type="button"
                           className="h-8 cursor-pointer rounded-full border border-black/20 bg-white px-3 text-xs font-medium text-black transition-all duration-200 ease-out hover:border-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:w-[84px] sm:text-sm dark:border-white/25 dark:bg-white/5 dark:text-white dark:hover:border-white dark:focus-visible:ring-white/30"
@@ -42,7 +46,7 @@ export default function RootLayout({
                           Sign in
                         </button>
                       </SignInButton>
-                      <SignUpButton mode="modal">
+                      <SignUpButton mode="modal" forceRedirectUrl={CREATE_INVOICE_PATH}>
                         <button
                           type="button"
                           className="h-8 cursor-pointer rounded-full bg-black px-3 text-xs font-medium text-white transition-all duration-200 ease-out hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:w-[84px] sm:text-sm dark:bg-white dark:text-black dark:hover:bg-zinc-200 dark:focus-visible:ring-white/30"
