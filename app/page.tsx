@@ -20,7 +20,7 @@ export default function Home() {
             className="hero-reveal mt-7 text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.045em] text-black sm:text-5xl lg:text-6xl xl:text-7xl dark:text-white"
             style={{ animationDelay: "50ms" }}
           >
-            Get paid faster with beautiful invoices.
+            Get Paid Faster With Beautiful Invoices
           </h1>
 
           <p
