@@ -1,4 +1,4 @@
-﻿ALTER TABLE "invoices"
+ALTER TABLE "invoices"
   ADD COLUMN "referenceNumber" TEXT,
   ADD COLUMN "internalNote" TEXT,
   ADD COLUMN "shippingAmount" DECIMAL(12,2) NOT NULL DEFAULT 0,

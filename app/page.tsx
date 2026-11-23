@@ -9,15 +9,15 @@ import { SiteFooter } from "@/components/landing/site-footer";
 export default function Home() {
   return (
     <div className="bg-white text-black">
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center px-5 pt-8 pb-16 sm:px-8 sm:pt-10 lg:pt-12">
-        <div className="grid w-full items-center gap-14 lg:grid-cols-2 lg:gap-16">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center px-5 pt-20 pb-16 sm:px-8 sm:pt-28 lg:pt-32">
+        <div className="grid w-full items-start gap-14 lg:grid-cols-2 lg:gap-16">
           {/* Copy */}
           <section className="flex flex-col items-center text-center lg:items-start lg:text-left">
             <h1
               className="hero-reveal text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.045em] text-black sm:text-5xl lg:text-6xl"
               style={{ animationDelay: "50ms" }}
             >
-              Create and send professional invoices in minutes
+              Create and Send Professional Invoices in Minutes
             </h1>
 
             <p
@@ -35,13 +35,6 @@ export default function Home() {
             >
               <GetStartedButton />
             </div>
-
-            <p
-              className="hero-reveal mt-4 font-mono text-xs tracking-wide text-zinc-500"
-              style={{ animationDelay: "200ms" }}
-            >
-              No sign-up needed · Free to start
-            </p>
           </section>
 
           {/* Product visual */}
