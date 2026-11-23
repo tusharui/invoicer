@@ -35,7 +35,7 @@ function formatMoney(value: number) {
 
 export function RevenueChart({ data }: { data: RevenuePoint[] }) {
   return (
-    <div className="h-[280px] w-full">
+    <div className="h-[320px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
           <defs>
@@ -53,15 +53,15 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
             dataKey="label"
             tickLine={false}
             axisLine={false}
-            tick={{ fontSize: 12, fill: "currentColor", opacity: 0.55 }}
-            dy={8}
+            tick={{ fontSize: 13, fill: "currentColor", opacity: 0.6 }}
+            dy={10}
           />
           <YAxis
             tickLine={false}
             axisLine={false}
-            tick={{ fontSize: 12, fill: "currentColor", opacity: 0.55 }}
+            tick={{ fontSize: 13, fill: "currentColor", opacity: 0.6 }}
             tickFormatter={formatCompact}
-            width={64}
+            width={72}
           />
           <Tooltip
             cursor={{ stroke: "currentColor", strokeOpacity: 0.1 }}
@@ -70,7 +70,7 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
               const invoiced = Number(payload.find((p) => p.dataKey === "invoiced")?.value ?? 0);
               const paid = Number(payload.find((p) => p.dataKey === "paid")?.value ?? 0);
               return (
-                <div className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm shadow-lg dark:border-white/10 dark:bg-zinc-950">
+                <div className="rounded-xl border border-black/10 bg-white px-4 py-3 text-base shadow-lg dark:border-white/10 dark:bg-zinc-950">
                   <p className="mb-1 font-medium text-black dark:text-white">{label}</p>
                   <p className="text-zinc-600 dark:text-zinc-300">Invoiced: {formatMoney(invoiced)}</p>
                   <p className="text-emerald-600 dark:text-emerald-400">Paid: {formatMoney(paid)}</p>
