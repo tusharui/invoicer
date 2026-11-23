@@ -39,7 +39,7 @@ export function IssueCorrectionDialog({ invoiceId, disabled }: Props) {
         <form action={formAction} className="mt-4 space-y-3">
           <input type="hidden" name="invoiceId" value={invoiceId} />
           <div>
-            <label className="mb-1 block font-mono text-base tracking-wide text-black dark:text-white" htmlFor="reason">
+            <label className="mb-1 block text-base font-medium text-black dark:text-white" htmlFor="reason">
               Reason
             </label>
             <textarea

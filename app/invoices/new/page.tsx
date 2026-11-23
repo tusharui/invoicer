@@ -20,23 +20,18 @@ export default async function NewInvoicePage() {
   const due = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-12 sm:px-8 sm:py-16">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className={monoLabelClass}>Invoices</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-black sm:text-4xl dark:text-white">
+          <h1 className="text-2xl font-semibold tracking-tight text-black sm:text-3xl dark:text-white">
             Create invoice
           </h1>
-          <p className="mt-2 text-base text-zinc-600 dark:text-zinc-300">
-            Fill in the details below and your invoice will be saved to your
-            account
-          </p>
         </div>
         <Link
           href="/invoices"
-          className="text-base font-medium text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-300"
+          className="inline-flex items-center rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-black hover:text-white dark:border-white/15 dark:text-white dark:hover:bg-white dark:hover:text-black"
         >
-          View all invoices
+          All invoices
         </Link>
       </div>
 

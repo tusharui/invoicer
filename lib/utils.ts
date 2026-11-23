@@ -5,6 +5,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Small field/section labels: Geist Mono.
+// Small field/section labels.
 export const monoLabelClass =
-  "mb-1 block font-mono text-base tracking-wide text-black dark:text-white"
+  "mb-1 block text-base font-medium text-black dark:text-white"
