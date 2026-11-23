@@ -22,10 +22,21 @@ type Item = {
   taxName: string;
 };
 
+type SavedClient = {
+  id: string;
+  name: string;
+  company: string;
+  email: string;
+  phone: string;
+  taxId: string;
+  addressLine1: string;
+};
+
 type Props = {
   defaultIssueDate: string;
   defaultDueDate: string;
   mode?: "create" | "demo";
+  savedClients?: SavedClient[];
 };
 
 const DEMO_STORAGE_KEY = "invoicer_demo_generated";
@@ -75,6 +86,7 @@ export function CreateInvoiceForm({
   defaultIssueDate,
   defaultDueDate,
   mode = "create",
+  savedClients = [],
 }: Props) {
   const [state, formAction, isPending] = useActionState<
     CreateInvoiceState,
@@ -82,6 +94,7 @@ export function CreateInvoiceForm({
   >(createInvoice, {});
   const [items, setItems] = useState<Item[]>([newItem()]);
   const [discount, setDiscount] = useState("0");
+  const [shippingAmount, setShippingAmount] = useState("0");
   const [clientType, setClientType] = useState<"individual" | "company">("individual");
   const [issueDate, setIssueDate] = useState(defaultIssueDate);
   const [dueDate, setDueDate] = useState(defaultDueDate);
@@ -89,6 +102,7 @@ export function CreateInvoiceForm({
   const [currency, setCurrency] = useState("USD");
   const [showFromDetails, setShowFromDetails] = useState(false);
   const [showBillToDetails, setShowBillToDetails] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   const [demoError, setDemoError] = useState<string | null>(null);
   const [demoGenerated, setDemoGenerated] = useState(false);
@@ -101,6 +115,24 @@ export function CreateInvoiceForm({
     if (Number.isNaN(base.getTime())) return;
     base.setDate(base.getDate() + days);
     setDueDate(base.toISOString().slice(0, 10));
+  }
+
+  function fillSavedClient(clientId: string) {
+    const client = savedClients.find((c) => c.id === clientId);
+    const form = formRef.current;
+    if (!client || !form) return;
+    const setVal = (name: string, value: string) => {
+      const el = form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null;
+      if (el) el.value = value;
+    };
+    setClientType(client.company ? "company" : "individual");
+    setVal("clientName", client.name);
+    setVal("clientCompany", client.company);
+    setVal("clientEmail", client.email);
+    setVal("clientPhone", client.phone);
+    setVal("clientTaxId", client.taxId);
+    setVal("clientAddress", client.addressLine1);
+    if (client.phone || client.taxId) setShowBillToDetails(true);
   }
 
   useEffect(() => {
@@ -126,15 +158,17 @@ export function CreateInvoiceForm({
     const discountPercent = Math.min(Math.max(Number(discount || 0), 0), 100);
     const taxableBase = Math.max(subtotal - itemDiscount + tax, 0);
     const discountValue = Math.round(taxableBase * discountPercent) / 100;
+    const shipping = Math.max(Number(shippingAmount || 0), 0);
     return {
       subtotal,
       itemDiscount,
       tax,
+      shipping,
       discountPercent,
       discount: discountValue,
-      total: subtotal - itemDiscount + tax - discountValue,
+      total: subtotal - itemDiscount + tax - discountValue + shipping,
     };
-  }, [items, discount]);
+  }, [items, discount, shippingAmount]);
 
   function updateItem(id: string, patch: Partial<Item>) {
     setItems((current) =>
@@ -193,27 +227,45 @@ export function CreateInvoiceForm({
         from: {
           name: text("fromName"),
           email: text("fromEmail"),
+          phone: text("fromPhone"),
+          taxId: text("fromTaxId"),
+          website: text("fromWebsite"),
           addressLine1: text("fromAddress"),
+          addressLine2: text("fromAddressLine2"),
         },
         to: {
           name: text("clientName"),
           company: text("clientCompany"),
           email: text("clientEmail"),
+          phone: text("clientPhone"),
+          taxId: text("clientTaxId"),
           addressLine1: text("clientAddress"),
         },
-        items: lineItems.map((item) => ({
-          description: item.description,
-          quantity: String(item.quantity),
-          unitPrice: item.unitPrice.toFixed(2),
-          taxRate: String(item.taxRate),
-          amount: (item.quantity * item.unitPrice).toFixed(2),
-        })),
+        items: items
+          .map((item) => ({
+            description: item.description.trim(),
+            unit: item.unit.trim() || undefined,
+            quantity: String(Number(item.quantity || 0)),
+            unitPrice: Number(item.unitPrice || 0).toFixed(2),
+            discountAmount: Math.min(Math.max(Number(item.discount || 0), 0), Math.max(Number(item.quantity || 0) * Number(item.unitPrice || 0), 0)).toFixed(2),
+            taxRate: String(Number(item.taxRate || 0)),
+            taxName: item.taxName.trim() || undefined,
+            amount: (Number(item.quantity || 0) * Number(item.unitPrice || 0)).toFixed(2),
+          }))
+          .filter((item) => item.description.length > 0),
         subtotal: totals.subtotal.toFixed(2),
         taxAmount: totals.tax.toFixed(2),
         discountAmount: (totals.itemDiscount + totals.discount).toFixed(2),
+        shippingAmount: totals.shipping.toFixed(2),
+        depositAmount: Number(text("depositAmount") || 0).toFixed(2),
         total: totals.total.toFixed(2),
         notes: text("notes") || null,
         terms: text("terms") || null,
+        referenceNumber: text("referenceNumber") || null,
+        taxLabel: text("taxLabel") || null,
+        paymentInstructions: text("paymentInstructions") || null,
+        paymentLabel: text("paymentLabel") || null,
+        paymentUrl: text("paymentUrl") || null,
       });
       try {
         localStorage.setItem(DEMO_STORAGE_KEY, "1");
@@ -334,6 +386,26 @@ export function CreateInvoiceForm({
                 </button>
               </div>
               <div className="space-y-3">
+                {savedClients.length > 0 && (
+                  <div>
+                    <label className={labelClass} htmlFor="savedClient">Saved client (optional)</label>
+                    <select
+                      id="savedClient"
+                      className={inputClass}
+                      defaultValue=""
+                      onChange={(e) => {
+                        if (e.target.value) fillSavedClient(e.target.value);
+                      }}
+                    >
+                      <option value="">Select a saved client</option>
+                      {savedClients.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.company ? `${c.company} — ${c.name}` : c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 {clientType === "individual" ? (
                   <>
                     <div>
@@ -489,6 +561,45 @@ export function CreateInvoiceForm({
                 <label className={labelClass} htmlFor="paymentInstructions">Payment instructions</label>
                 <textarea id="paymentInstructions" name="paymentInstructions" rows={2} className={inputClass} placeholder="Bank transfer, UPI, check details, or other payment instructions" />
               </div>
+              <div>
+                <label className={labelClass} htmlFor="referenceNumber">PO / Reference (optional)</label>
+                <input id="referenceNumber" name="referenceNumber" className={inputClass} placeholder="PO-12345" />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="shippingAmount">Shipping / fees (optional)</label>
+                <input id="shippingAmount" name="shippingAmount" type="number" min="0" step="0.01" value={shippingAmount} onChange={(e) => setShippingAmount(e.target.value)} className={inputClass} placeholder="0" />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="depositAmount">Deposit due (optional)</label>
+                <input id="depositAmount" name="depositAmount" type="number" min="0" step="0.01" className={inputClass} placeholder="0" />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="taxLabel">Tax label (optional)</label>
+                <input id="taxLabel" name="taxLabel" className={inputClass} placeholder="GST / VAT / Sales tax" />
+              </div>
+              <div className="sm:col-span-2 xl:col-span-4 rounded-xl border border-black/5 p-3 dark:border-white/10">
+                <label className="flex items-center gap-2 text-sm font-medium text-black dark:text-white">
+                  <input type="checkbox" name="isRecurring" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="size-4 rounded border-black/20" />
+                  Recurring invoice (optional)
+                </label>
+                {isRecurring && (
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass} htmlFor="recurrenceInterval">Frequency</label>
+                      <select id="recurrenceInterval" name="recurrenceInterval" className={inputClass} defaultValue="MONTHLY">
+                        <option value="WEEKLY">Weekly</option>
+                        <option value="MONTHLY">Monthly</option>
+                        <option value="QUARTERLY">Quarterly</option>
+                        <option value="YEARLY">Yearly</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="recurrenceEndsAt">Ends on (optional)</label>
+                      <input id="recurrenceEndsAt" name="recurrenceEndsAt" type="date" className={inputClass} />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 
@@ -562,7 +673,7 @@ export function CreateInvoiceForm({
 
           <div className="grid gap-4 md:grid-cols-2">
             <section className={sectionClass}>
-              <h2 className={headingClass + " mb-3"}>Notes</h2>
+              <h2 className={headingClass + " mb-3"}>Notes (customer visible)</h2>
               <textarea name="notes" rows={3} className={inputClass} placeholder="Thank you for your business" />
             </section>
             <section className={sectionClass}>
@@ -570,6 +681,10 @@ export function CreateInvoiceForm({
               <textarea name="terms" rows={3} className={inputClass} placeholder="Payment due within 14 days" />
             </section>
           </div>
+          <section className={sectionClass}>
+            <h2 className={headingClass + " mb-3"}>Internal note (optional)</h2>
+            <textarea name="internalNote" rows={2} className={inputClass} placeholder="Private note for your team only" />
+          </section>
         </div>
 
         <div className="space-y-4">
@@ -588,6 +703,12 @@ export function CreateInvoiceForm({
                 <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
                   <dt>Item discounts</dt>
                   <dd className="font-medium text-black dark:text-white">-{money(totals.itemDiscount, currency)}</dd>
+                </div>
+              )}
+              {totals.shipping > 0 && (
+                <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
+                  <dt>Shipping / fees</dt>
+                  <dd className="font-medium text-black dark:text-white">{money(totals.shipping, currency)}</dd>
                 </div>
               )}
               <div className="flex justify-between text-zinc-600 dark:text-zinc-300">

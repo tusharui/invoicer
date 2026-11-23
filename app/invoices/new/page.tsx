@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { CreateInvoiceForm } from "@/components/invoice/create-invoice-form";
-import { monoLabelClass } from "@/lib/utils";
+import { prisma } from "@/lib/prisma";
 
 // Reads the Clerk session (cookies) on every request.
 export const instant = false;
@@ -15,6 +15,16 @@ export default async function NewInvoicePage() {
 
   // Opt out of prerendering before reading the current time.
   await connection();
+
+  const dbUser = await prisma.user.findUnique({ where: { clerkId: userId }, select: { id: true } });
+  const clients = dbUser
+    ? await prisma.client.findMany({
+        where: { userId: dbUser.id },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        select: { id: true, name: true, company: true, email: true, phone: true, taxId: true, addressLine1: true },
+      })
+    : [];
 
   const today = new Date();
   const due = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
@@ -38,6 +48,15 @@ export default async function NewInvoicePage() {
       <CreateInvoiceForm
         defaultIssueDate={today.toISOString().slice(0, 10)}
         defaultDueDate={due.toISOString().slice(0, 10)}
+        savedClients={clients.map((c) => ({
+          id: c.id,
+          name: c.name,
+          company: c.company ?? "",
+          email: c.email ?? "",
+          phone: c.phone ?? "",
+          taxId: c.taxId ?? "",
+          addressLine1: c.addressLine1 ?? "",
+        }))}
       />
     </main>
   );

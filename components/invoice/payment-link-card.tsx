@@ -8,13 +8,15 @@ import { monoLabelClass as labelClass } from "@/lib/utils";
 type Props = {
   invoiceId: string;
   paymentUrl: string | null;
+  paymentLabel?: string | null;
+  paymentInstructions?: string | null;
   disabled?: boolean;
 };
 
 const inputClass =
   "mt-0 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-base text-black outline-none transition-colors placeholder:text-zinc-400 focus:border-black focus-visible:ring-2 focus-visible:ring-black/10 dark:border-white/15 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white";
 
-export function PaymentLinkCard({ invoiceId, paymentUrl, disabled }: Props) {
+export function PaymentLinkCard({ invoiceId, paymentUrl, paymentLabel, paymentInstructions, disabled }: Props) {
   const [copied, setCopied] = useState(false);
   const [state, formAction, isPending] = useActionState<PaymentActionState, FormData>(
     updatePaymentUrl,
@@ -41,8 +43,11 @@ export function PaymentLinkCard({ invoiceId, paymentUrl, disabled }: Props) {
     <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
       <p className={labelClass}>Payment link</p>
       <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-        Add any payment link you already have. When you send the invoice, the client gets a &quot;Pay now&quot; button
+        Add any payment link you already have. When you send the invoice, the client gets a {paymentLabel || "Pay now"} button
       </p>
+      {paymentInstructions && (
+        <p className="mt-3 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">{paymentInstructions}</p>
+      )}
 
       {paymentUrl ? (
         <div className="mt-4 flex flex-wrap items-center gap-2">

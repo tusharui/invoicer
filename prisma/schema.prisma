@@ -170,12 +170,20 @@ model Invoice {
   amountPaid     Decimal @default(0) @db.Decimal(12, 2)
   balanceDue     Decimal @default(0) @db.Decimal(12, 2)
 
+  referenceNumber     String?
   notes               String?
+  internalNote        String?
   terms               String?
   paymentInstructions String?
   paymentUrl          String?
   paymentLabel        String?
   pdfUrl              String?
+  shippingAmount      Decimal @default(0) @db.Decimal(12, 2)
+  depositAmount       Decimal @default(0) @db.Decimal(12, 2)
+  taxLabel            String?
+  isRecurring         Boolean @default(false)
+  recurrenceInterval  String?
+  recurrenceEndsAt    DateTime? @db.Date
 
   fromSnapshot Json?
   toSnapshot   Json?

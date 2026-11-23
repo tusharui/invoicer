@@ -115,6 +115,23 @@ export async function createInvoice(
     return { error: 'Add at least one line item' };
   }
 
+  const paymentUrl = parsePaymentUrl(formData.get('paymentUrl'));
+  if (paymentUrl === undefined) {
+    return { error: 'Enter a valid payment link (https://...)' };
+  }
+  const paymentInstructions = text(formData.get('paymentInstructions')) || null;
+  const paymentLabel = text(formData.get('paymentLabel')) || null;
+  const referenceNumber = text(formData.get('referenceNumber')) || null;
+  const shippingAmount = Math.max(number(formData.get('shippingAmount'), 0), 0);
+  const depositAmount = Math.max(number(formData.get('depositAmount'), 0), 0);
+  const internalNote = text(formData.get('internalNote')) || null;
+  const taxLabel = text(formData.get('taxLabel')) || null;
+  const isRecurring = formData.get('isRecurring') === 'on';
+  const recurrenceInterval = text(formData.get('recurrenceInterval')) || null;
+  const recurrenceEndsAtRaw = text(formData.get('recurrenceEndsAt'));
+  const recurrenceEndsAt = recurrenceEndsAtRaw ? toDate(recurrenceEndsAtRaw) : null;
+  const saveDefaults = formData.get('saveDefaults') === 'on';
+
   const subtotal = round2(lineItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0));
   const itemDiscount = round2(lineItems.reduce((sum, item) => sum + item.discountAmount, 0));
   const taxAmount = round2(
@@ -125,15 +142,8 @@ export async function createInvoice(
   );
   const discountPercent = Math.min(Math.max(number(formData.get('discount'), 0), 0), 100);
   const discount = round2(((subtotal - itemDiscount + taxAmount) * discountPercent) / 100);
-  const total = round2(subtotal - itemDiscount + taxAmount - discount);
-
-  const paymentUrl = parsePaymentUrl(formData.get('paymentUrl'));
-  if (paymentUrl === undefined) {
-    return { error: 'Enter a valid payment link (https://...)' };
-  }
-  const paymentInstructions = text(formData.get('paymentInstructions')) || null;
-  const paymentLabel = text(formData.get('paymentLabel')) || null;
-  const saveDefaults = formData.get('saveDefaults') === 'on';
+  const total = round2(subtotal - itemDiscount + taxAmount - discount + shippingAmount);
+  const safeDepositAmount = round2(Math.min(Math.max(depositAmount, 0), Math.max(total, 0)));
 
   const clerkUser = await currentUser();
   const email =
@@ -251,11 +261,19 @@ export async function createInvoice(
         total,
         amountPaid: 0,
         balanceDue: total,
+        referenceNumber,
         notes: invoiceNotes,
+        internalNote,
         terms: invoiceTerms,
         paymentUrl,
         paymentInstructions,
         paymentLabel,
+        shippingAmount: round2(shippingAmount),
+        depositAmount: safeDepositAmount,
+        taxLabel,
+        isRecurring,
+        recurrenceInterval: isRecurring ? recurrenceInterval : null,
+        recurrenceEndsAt: isRecurring ? recurrenceEndsAt : null,
         fromSnapshot: {
           name: fromName || business?.name || '',
           email: fromEmail || business?.email || '',
@@ -375,27 +393,43 @@ export async function sendInvoice(
       from: {
         name: from.name,
         email: from.email,
+        phone: from.phone,
+        taxId: from.taxId,
+        website: from.website,
         addressLine1: from.addressLine1,
+        addressLine2: from.addressLine2,
       },
       to: {
         name: to.name,
         company: to.company,
         email: to.email,
+        phone: to.phone,
+        taxId: to.taxId,
         addressLine1: to.addressLine1,
       },
       items: invoice.items.map((item) => ({
         description: item.description,
+        unit: item.unit ?? undefined,
         quantity: String(item.quantity),
         unitPrice: String(item.unitPrice),
+        discountAmount: String(item.discountAmount),
         taxRate: String(item.taxRate),
+        taxName: item.taxName ?? undefined,
         amount: String(item.amount),
       })),
       subtotal: String(invoice.subtotal),
       taxAmount: String(invoice.taxAmount),
       discountAmount: String(invoice.discountAmount),
+      shippingAmount: String(invoice.shippingAmount),
+      depositAmount: String(invoice.depositAmount),
       total: String(invoice.total),
       notes: invoice.notes,
       terms: invoice.terms,
+      referenceNumber: invoice.referenceNumber,
+      taxLabel: invoice.taxLabel,
+      paymentInstructions: invoice.paymentInstructions,
+      paymentLabel: invoice.paymentLabel,
+      paymentUrl: invoice.paymentUrl,
     });
 
     const transporter = nodemailer.createTransport({
@@ -410,15 +444,22 @@ export async function sendInvoice(
     const safePaymentUrl = invoice.paymentUrl
       ? invoice.paymentUrl.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
       : null;
+    const safePaymentLabel = (invoice.paymentLabel || "Pay now").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const safePaymentInstructions = invoice.paymentInstructions
+      ? invoice.paymentInstructions.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />")
+      : "";
     const payNowBlock = safePaymentUrl
       ? `
           <p style="margin:24px 0 8px">
-            <a href="${safePaymentUrl}" style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600">Pay now</a>
+            <a href="${safePaymentUrl}" style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600">${safePaymentLabel}</a>
           </p>
           <p style="color:#555;font-size:13px;line-height:1.6;margin:0 0 24px">
             Or copy this link: <a href="${safePaymentUrl}" style="color:#111">${safePaymentUrl}</a>
           </p>
         `
+      : "";
+    const paymentInstructionsBlock = safePaymentInstructions
+      ? `<p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 24px"><strong style="color:#111">Payment instructions</strong><br />${safePaymentInstructions}</p>`
       : "";
 
     await transporter.sendMail({
@@ -438,6 +479,7 @@ export async function sendInvoice(
             payable by ${displayDate(invoice.dueDate)}.
           </p>
           ${payNowBlock}
+          ${paymentInstructionsBlock}
           <p style="color:#555;font-size:13px;margin-top:32px">
             Sent by ${from.name || 'Invoicer'}${from.email ? ` (${from.email})` : ''}.
           </p>

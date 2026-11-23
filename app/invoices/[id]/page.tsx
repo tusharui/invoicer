@@ -101,8 +101,8 @@ export default async function InvoiceDetailPage({
             <InvoiceStatusBadge status={billing.status} isOverdue={billing.isOverdue} />
           </div>
           <p className="mt-2 text-base text-zinc-600 dark:text-zinc-300">
-            Issued {formatDate(invoice.issueDate)} · Due{" "}
-            {formatDate(invoice.dueDate)}
+            Issued {formatDate(invoice.issueDate)} · Due {formatDate(invoice.dueDate)}
+            {invoice.referenceNumber ? ` · Ref ${invoice.referenceNumber}` : ""}
           </p>
         </div>
         <div className="flex flex-col items-end gap-3">
@@ -123,27 +123,43 @@ export default async function InvoiceDetailPage({
             from={{
               name: from.name,
               email: from.email,
+              phone: from.phone,
+              taxId: from.taxId,
+              website: from.website,
               addressLine1: from.addressLine1,
+              addressLine2: from.addressLine2,
             }}
             to={{
               name: to.name,
               company: to.company,
               email: to.email,
+              phone: to.phone,
+              taxId: to.taxId,
               addressLine1: to.addressLine1,
             }}
             items={invoice.items.map((item) => ({
               description: item.description,
+              unit: item.unit ?? undefined,
               quantity: String(item.quantity),
               unitPrice: String(item.unitPrice),
+              discountAmount: String(item.discountAmount),
               taxRate: String(item.taxRate),
+              taxName: item.taxName ?? undefined,
               amount: String(item.amount),
             }))}
             subtotal={String(invoice.subtotal)}
             taxAmount={String(invoice.taxAmount)}
             discountAmount={String(invoice.discountAmount)}
+            shippingAmount={String(invoice.shippingAmount)}
+            depositAmount={String(invoice.depositAmount)}
             total={String(invoice.total)}
             notes={invoice.notes}
             terms={invoice.terms}
+            referenceNumber={invoice.referenceNumber}
+            taxLabel={invoice.taxLabel}
+            paymentInstructions={invoice.paymentInstructions}
+            paymentLabel={invoice.paymentLabel}
+            paymentUrl={invoice.paymentUrl}
           />
         </div>
       </div>
@@ -192,32 +208,26 @@ export default async function InvoiceDetailPage({
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">
         <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
-          <p className={monoLabelClass}>
-            From
-          </p>
-          <p className="mt-3 font-medium text-black dark:text-white">
-            {from.name || "—"}
-          </p>
-          <p className="mt-1 text-base text-zinc-600 dark:text-zinc-300">
-            {from.email}
-          </p>
+          <p className={monoLabelClass}>From</p>
+          <p className="mt-3 font-medium text-black dark:text-white">{from.name || "—"}</p>
+          {[from.email, from.phone].filter(Boolean).map((v) => (
+            <p key={v} className="mt-1 text-base text-zinc-600 dark:text-zinc-300">{v}</p>
+          ))}
+          {[from.website, from.taxId ? `Tax ID: ${from.taxId}` : ""].filter(Boolean).map((v) => (
+            <p key={v} className="mt-1 text-base text-zinc-600 dark:text-zinc-300">{v}</p>
+          ))}
           <p className="mt-1 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">
-            {from.addressLine1}
+            {[from.addressLine1, from.addressLine2].filter(Boolean).join("\n")}
           </p>
         </div>
         <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
-          <p className={monoLabelClass}>
-            Bill to
-          </p>
-          <p className="mt-3 font-medium text-black dark:text-white">
-            {to.name || "—"}
-          </p>
-          <p className="mt-1 text-base text-zinc-600 dark:text-zinc-300">
-            {[to.company, to.email].filter(Boolean).join(" · ")}
-          </p>
-          <p className="mt-1 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">
-            {to.addressLine1}
-          </p>
+          <p className={monoLabelClass}>Bill to</p>
+          <p className="mt-3 font-medium text-black dark:text-white">{to.name || "—"}</p>
+          {[to.company, to.email, to.phone].filter(Boolean).map((v) => (
+            <p key={v} className="mt-1 text-base text-zinc-600 dark:text-zinc-300">{v}</p>
+          ))}
+          {to.taxId && <p className="mt-1 text-base text-zinc-600 dark:text-zinc-300">Tax ID: {to.taxId}</p>}
+          <p className="mt-1 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">{to.addressLine1}</p>
         </div>
       </div>
 
@@ -225,6 +235,8 @@ export default async function InvoiceDetailPage({
         <PaymentLinkCard
           invoiceId={invoice.id}
           paymentUrl={invoice.paymentUrl}
+          paymentLabel={invoice.paymentLabel}
+          paymentInstructions={invoice.paymentInstructions}
           disabled={["VOID", "SUPERSEDED"].includes(billing.status)}
         />
       </div>
@@ -248,16 +260,19 @@ export default async function InvoiceDetailPage({
             {invoice.items.map((item) => (
               <tr key={item.id}>
                 <td className="px-5 py-4 text-black dark:text-white">
-                  {item.description}
+                  <div>{item.description}</div>
+                  {Number(item.discountAmount) > 0 && (
+                    <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Discount: -{money(item.discountAmount)}</div>
+                  )}
                 </td>
                 <td className="px-5 py-4 text-right tabular-nums text-zinc-600 dark:text-zinc-300">
-                  {String(item.quantity)}
+                  {String(item.quantity)}{item.unit ? ` ${item.unit}` : ""}
                 </td>
                 <td className="px-5 py-4 text-right tabular-nums text-zinc-600 dark:text-zinc-300">
                   {money(item.unitPrice)}
                 </td>
                 <td className="px-5 py-4 text-right tabular-nums text-zinc-600 dark:text-zinc-300">
-                  {String(item.taxRate)}%
+                  {String(item.taxRate)}%{item.taxName ? ` ${item.taxName}` : ""}
                 </td>
                 <td className="px-5 py-4 text-right font-medium tabular-nums text-black dark:text-white">
                   {money(item.amount)}
@@ -275,7 +290,7 @@ export default async function InvoiceDetailPage({
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4 text-zinc-600 dark:text-zinc-300">
-            <dt>Tax amount</dt>
+            <dt>{invoice.taxLabel ? `${invoice.taxLabel} amount` : "Tax amount"}</dt>
             <dd>
               <Money value={invoice.taxAmount} currency={invoice.currency} />
             </dd>
@@ -283,22 +298,27 @@ export default async function InvoiceDetailPage({
           <div className="flex items-baseline justify-between gap-4 text-zinc-600 dark:text-zinc-300">
             <dt>Discount</dt>
             <dd>
-              <Money
-                value={-Number(invoice.discountAmount)}
-                currency={invoice.currency}
-              />
+              <Money value={-Number(invoice.discountAmount)} currency={invoice.currency} />
             </dd>
           </div>
+          {Number(invoice.shippingAmount) > 0 && (
+            <div className="flex items-baseline justify-between gap-4 text-zinc-600 dark:text-zinc-300">
+              <dt>Shipping / fees</dt>
+              <dd><Money value={invoice.shippingAmount} currency={invoice.currency} /></dd>
+            </div>
+          )}
           <div className="flex items-baseline justify-between gap-4 border-t border-black/10 pt-3 text-base font-semibold text-black dark:border-white/10 dark:text-white">
             <dt>Total</dt>
             <dd>
-              <Money
-                value={invoice.total}
-                currency={invoice.currency}
-                className="text-xl"
-              />
+              <Money value={invoice.total} currency={invoice.currency} className="text-xl" />
             </dd>
           </div>
+          {Number(invoice.depositAmount) > 0 && (
+            <div className="flex items-baseline justify-between gap-4 text-zinc-600 dark:text-zinc-300">
+              <dt>Deposit due</dt>
+              <dd><Money value={invoice.depositAmount} currency={invoice.currency} /></dd>
+            </div>
+          )}
         </dl>
       </div>
 
@@ -375,26 +395,24 @@ export default async function InvoiceDetailPage({
         />
       </section>
 
-      {(invoice.notes || invoice.terms) && (
+      {(invoice.notes || invoice.terms || invoice.internalNote) && (
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
           {invoice.notes && (
             <div>
-              <p className={monoLabelClass}>
-                Notes
-              </p>
-              <p className="mt-2 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">
-                {invoice.notes}
-              </p>
+              <p className={monoLabelClass}>Notes</p>
+              <p className="mt-2 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">{invoice.notes}</p>
             </div>
           )}
           {invoice.terms && (
             <div>
-              <p className={monoLabelClass}>
-                Terms
-              </p>
-              <p className="mt-2 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">
-                {invoice.terms}
-              </p>
+              <p className={monoLabelClass}>Terms</p>
+              <p className="mt-2 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">{invoice.terms}</p>
+            </div>
+          )}
+          {invoice.internalNote && (
+            <div>
+              <p className={monoLabelClass}>Internal note</p>
+              <p className="mt-2 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">{invoice.internalNote}</p>
             </div>
           )}
         </div>
