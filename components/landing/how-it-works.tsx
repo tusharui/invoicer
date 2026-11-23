@@ -47,14 +47,14 @@ export function HowItWorks() {
                 className="rounded-2xl border border-black/10 p-6 dark:border-white/10"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs text-zinc-400">
+                  <span className="font-mono text-sm text-zinc-400">
                     {step.number}
                   </span>
                   <span className="flex size-10 items-center justify-center rounded-xl border border-white/10">
                     <Icon className="size-5 text-white" />
                   </span>
                 </div>
-                <h3 className="mt-6 text-lg font-semibold text-white">
+                <h3 className="mt-6 text-xl font-semibold text-white">
                   {step.title}
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-zinc-300">

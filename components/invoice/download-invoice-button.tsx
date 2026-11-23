@@ -230,7 +230,7 @@ export function DownloadInvoiceButton(props: InvoiceDownloadData) {
         <Download className="size-4" />
         {busy ? "Preparing…" : "Download invoice"}
       </button>
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
 }

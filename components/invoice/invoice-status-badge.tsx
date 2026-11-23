@@ -32,14 +32,14 @@ export function InvoiceStatusBadge({ status, isOverdue, className }: Props) {
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
       <span
         className={cn(
-          "inline-flex rounded-full px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest",
+          "inline-flex rounded-full px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wide",
           STATUS_STYLES[status] ?? STATUS_STYLES.DRAFT,
         )}
       >
         {label(status)}
       </span>
       {isOverdue && status !== "OVERDUE" && (
-        <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-red-700 dark:bg-red-500/15 dark:text-red-300">
+        <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wide text-red-700 dark:bg-red-500/15 dark:text-red-300">
           Overdue
         </span>
       )}

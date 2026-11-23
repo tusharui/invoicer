@@ -38,7 +38,7 @@ function formatDisplayDate(value: string): string {
 }
 
 const inputClass =
-  "mt-1.5 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-base text-black outline-none transition-colors placeholder:text-zinc-400 focus:border-black focus-visible:ring-2 focus-visible:ring-black/10 dark:border-white/15 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white";
+  "mt-0 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-base text-black outline-none transition-colors placeholder:text-zinc-400 focus:border-black focus-visible:ring-2 focus-visible:ring-black/10 dark:border-white/15 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white";
 
 const sectionClass =
   "rounded-2xl border border-black/10 bg-white p-5 shadow-sm sm:p-6 dark:border-white/10 dark:bg-black dark:shadow-none";
@@ -401,7 +401,7 @@ export function CreateInvoiceForm({
               className={inputClass}
               placeholder="https://pay.example.com/your-link"
             />
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
               Any payment link you already have. A &quot;Pay now&quot; button will be included when you send the invoice
             </p>
           </div>
@@ -415,7 +415,7 @@ export function CreateInvoiceForm({
           <button
             type="button"
             onClick={() => setItems((current) => [...current, newItem()])}
-            className="inline-flex items-center gap-1.5 rounded-full border border-black/15 px-3 py-1.5 text-xs font-medium text-black transition-colors hover:border-black dark:border-white/20 dark:text-white dark:hover:border-white"
+            className="inline-flex items-center gap-1.5 rounded-full border border-black/15 px-3 py-1.5 text-sm font-medium text-black transition-colors hover:border-black dark:border-white/20 dark:text-white dark:hover:border-white"
           >
             <Plus className="size-3.5" /> Add item
           </button>
@@ -572,7 +572,7 @@ export function CreateInvoiceForm({
                 Create free account
               </button>
             </SignUpButton>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">
               No credit card required
             </span>
           </div>
@@ -585,7 +585,7 @@ export function CreateInvoiceForm({
             type="button"
             onClick={handleDemoDownload}
             disabled={demoBusy || demoGenerated}
-            className="h-10 rounded-full bg-black px-4 text-lg text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
+            className="h-10 rounded-full bg-black px-4 text-xl text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
           >
             {demoBusy ? "Preparing…" : demoGenerated ? "Demo used" : "Download demo invoice"}
           </button>
@@ -593,7 +593,7 @@ export function CreateInvoiceForm({
           <button
             type="submit"
             disabled={isPending}
-            className="h-10 rounded-full bg-black px-4 text-lg  text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
+            className="h-10 rounded-full bg-black px-4 text-xl  text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
           >
             {isPending ? "Creating…" : "Create invoice"}
           </button>

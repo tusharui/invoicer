@@ -22,7 +22,7 @@ export default function Demo({ variant = "night" }: { variant?: string }) {
       >
         <div className="pointer-events-none flex h-full flex-col items-center px-6 pt-[14%] text-center">
           <p
-            className={`font-mono text-[11px] uppercase tracking-[0.16em] ${t.light ? "text-black/45" : "text-white/50"}`}
+            className={`font-mono text-xs tracking-[0.16em] ${t.light ? "text-black/45" : "text-white/50"}`}
           >
             Vitrine Signal · v4
           </p>

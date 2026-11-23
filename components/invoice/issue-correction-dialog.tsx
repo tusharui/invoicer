@@ -21,7 +21,7 @@ export function IssueCorrectionDialog({ invoiceId, disabled }: Props) {
     <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-black dark:text-white">Need to correct this invoice</h3>
+          <h3 className="text-xl font-semibold text-black dark:text-white">Need to correct this invoice</h3>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
             Sent invoices are locked. Issue a replacement draft and keep the original record
           </p>
@@ -39,7 +39,7 @@ export function IssueCorrectionDialog({ invoiceId, disabled }: Props) {
         <form action={formAction} className="mt-4 space-y-3">
           <input type="hidden" name="invoiceId" value={invoiceId} />
           <div>
-            <label className="mb-1.5 block font-mono text-[12px] uppercase tracking-widest text-zinc-500 dark:text-zinc-400" htmlFor="reason">
+            <label className="mb-1 block font-mono text-base tracking-wide text-black dark:text-white" htmlFor="reason">
               Reason
             </label>
             <textarea

@@ -231,7 +231,7 @@ export default async function InvoiceDetailPage({
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
         <table className="w-full text-left text-base">
-          <thead className="bg-black font-mono text-[10px] uppercase tracking-widest text-white dark:bg-white dark:text-black">
+          <thead className="bg-black font-mono text-xs tracking-wide text-white dark:bg-white dark:text-black">
             <tr>
               <th className="px-5 py-3 font-semibold">Description</th>
               <th className="px-5 py-3 text-right font-semibold">Qty</th>
@@ -295,7 +295,7 @@ export default async function InvoiceDetailPage({
               <Money
                 value={invoice.total}
                 currency={invoice.currency}
-                className="text-lg"
+                className="text-xl"
               />
             </dd>
           </div>

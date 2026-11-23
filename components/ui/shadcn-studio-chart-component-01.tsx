@@ -166,7 +166,7 @@ function ChartContainer({
         data-slot='chart'
         data-chart={chartId}
         className={cn(
-          'flex aspect-video justify-center text-xs [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden',
+          'flex aspect-video justify-center text-sm [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden',
           className
         )}
         {...props}
@@ -197,7 +197,7 @@ function ChartTooltipContent({
   return (
     <div
       className={cn(
-        'border-border/50 bg-background grid min-w-32 items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl',
+        'border-border/50 bg-background grid min-w-32 items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm shadow-xl',
         className
       )}
     >
@@ -294,7 +294,7 @@ const SalesMetricsCard = ({
       <CardContent>
         <div className='grid gap-6 lg:grid-cols-5'>
           <div className='flex flex-col justify-between gap-7 lg:col-span-3'>
-            <h2 className='text-lg font-semibold'>{title}</h2>
+            <h2 className='text-xl font-semibold'>{title}</h2>
 
             {company && (
               <div className='flex items-center gap-3'>
@@ -321,7 +321,7 @@ const SalesMetricsCard = ({
                       </Avatar>
                       <div className='flex flex-col gap-0.5'>
                         <span className='text-muted-foreground text-sm font-medium'>{metric.title}</span>
-                        <span className='text-lg font-medium'>{metric.value}</span>
+                        <span className='text-xl font-medium'>{metric.value}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -332,7 +332,7 @@ const SalesMetricsCard = ({
 
           <Card className='ring-foreground/10 justify-between gap-4 shadow-none ring-1 lg:col-span-2'>
             <CardHeader className='gap-1'>
-              <CardTitle className='text-lg font-semibold'>{revenueTitle}</CardTitle>
+              <CardTitle className='text-xl font-semibold'>{revenueTitle}</CardTitle>
             </CardHeader>
 
             <CardContent className='space-y-4'>
@@ -363,7 +363,7 @@ const SalesMetricsCard = ({
                               <tspan
                                 x={viewBox.cx}
                                 y={(viewBox.cy || 0) - 12}
-                                className='fill-card-foreground text-lg font-medium'
+                                className='fill-card-foreground text-xl font-medium'
                               >
                                 {revenueTotal}
                               </tspan>
@@ -391,18 +391,18 @@ const SalesMetricsCard = ({
         <Card className='ring-foreground/10 shadow-none ring-1'>
           <CardContent className='grid gap-4 lg:grid-cols-5'>
             <div className='flex flex-col justify-center gap-6'>
-              <h3 className='text-lg font-semibold'>{salesPlanTitle}</h3>
+              <h3 className='text-xl font-semibold'>{salesPlanTitle}</h3>
               <span className='text-6xl'>{salesPlanPercentage}%</span>
               <span className='text-muted-foreground text-sm'>{salesPlanCaption}</span>
             </div>
-            <div className='flex flex-col gap-6 text-lg md:col-span-4'>
+            <div className='flex flex-col gap-6 text-xl md:col-span-4'>
               <h3 className='font-medium'>{cohortTitle}</h3>
               <p className='text-muted-foreground text-wrap'>{cohortDescription}</p>
               <ul className='grid gap-6 md:grid-cols-2'>
                 {cohortIndicators.map(indicator => (
                   <li key={indicator.label} className='flex items-center gap-2'>
                     <indicator.icon className='size-6' />
-                    <span className='text-lg font-medium'>{indicator.label}</span>
+                    <span className='text-xl font-medium'>{indicator.label}</span>
                   </li>
                 ))}
               </ul>

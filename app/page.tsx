@@ -21,7 +21,7 @@ export default function Home() {
             </h1>
 
             <p
-              className="hero-reveal mt-6 max-w-xl text-pretty text-base leading-7 text-zinc-300 sm:text-lg sm:leading-8"
+              className="hero-reveal mt-6 max-w-xl text-pretty text-base leading-7 text-zinc-300 sm:text-xl sm:leading-8"
               style={{ animationDelay: "100ms" }}
             >
               Create professional invoices in minutes and share them with your
@@ -37,7 +37,7 @@ export default function Home() {
             </div>
 
             <p
-              className="hero-reveal mt-4 font-mono text-xs uppercase tracking-widest text-zinc-400"
+              className="hero-reveal mt-4 font-mono text-xs tracking-wide text-zinc-400"
               style={{ animationDelay: "200ms" }}
             >
               No sign-up needed · Free to start

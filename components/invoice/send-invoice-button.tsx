@@ -46,7 +46,7 @@ export function SendInvoiceButton({ invoiceId, defaultEmail, sent, canRemind }: 
             <>
               <label
                 htmlFor="sendEmail"
-                className="block text-xs font-medium text-zinc-600 dark:text-zinc-300"
+                className="block text-sm font-medium text-zinc-600 dark:text-zinc-300"
               >
                 Recipient email
               </label>
@@ -64,12 +64,12 @@ export function SendInvoiceButton({ invoiceId, defaultEmail, sent, canRemind }: 
           )}
 
           {state.error && (
-            <p role="alert" className="text-xs text-red-500">
+            <p role="alert" className="text-sm text-red-500">
               {state.error}
             </p>
           )}
           {state.success && (
-            <p role="status" className="text-xs text-green-600 dark:text-green-400">
+            <p role="status" className="text-sm text-green-600 dark:text-green-400">
               {state.success}
             </p>
           )}

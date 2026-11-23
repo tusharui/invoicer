@@ -59,7 +59,7 @@ export function PaymentsTable({ invoiceId, currency, payments, canManage }: Prop
   return (
     <div className="overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
       <table className="w-full text-left text-sm">
-        <thead className="bg-black font-mono text-[10px] uppercase tracking-widest text-white dark:bg-white dark:text-black">
+        <thead className="bg-black font-mono text-xs tracking-wide text-white dark:bg-white dark:text-black">
           <tr>
             <th className="px-4 py-3 font-semibold">Date</th>
             <th className="px-4 py-3 font-semibold">Method</th>
@@ -75,17 +75,17 @@ export function PaymentsTable({ invoiceId, currency, payments, canManage }: Prop
               <tr key={payment.id} className={voided ? "opacity-60" : ""}>
                 <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
                   {payment.paidAt}
-                  {voided && <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-red-500">Voided</span>}
+                  {voided && <span className="ml-2 font-mono text-xs tracking-wide text-red-500">Voided</span>}
                 </td>
                 <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
                   {methodLabel(payment.method)}
-                  {payment.note && <div className="text-xs text-zinc-500 dark:text-zinc-400">{payment.note}</div>}
-                  {voided && payment.voidReason && <div className="text-xs text-red-500">{payment.voidReason}</div>}
+                  {payment.note && <div className="text-sm text-zinc-500 dark:text-zinc-400">{payment.note}</div>}
+                  {voided && payment.voidReason && <div className="text-sm text-red-500">{payment.voidReason}</div>}
                 </td>
                 <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{payment.reference || "—"}</td>
                 <td className="px-4 py-3 text-right font-medium text-black dark:text-white">
                   <Money value={voided ? 0 : payment.amount} currency={currency} />
-                  {voided && <div className="text-xs text-zinc-500 line-through"><Money value={payment.amount} currency={currency} /></div>}
+                  {voided && <div className="text-sm text-zinc-500 line-through"><Money value={payment.amount} currency={currency} /></div>}
                 </td>
                 {canManage && (
                   <td className="px-4 py-3 text-right">
@@ -94,12 +94,12 @@ export function PaymentsTable({ invoiceId, currency, payments, canManage }: Prop
                         type="button"
                         onClick={() => onVoid(payment.id)}
                         disabled={busyId === payment.id}
-                        className="text-xs font-medium text-red-600 underline-offset-4 hover:underline disabled:opacity-50 dark:text-red-400"
+                        className="text-sm font-medium text-red-600 underline-offset-4 hover:underline disabled:opacity-50 dark:text-red-400"
                       >
                         {busyId === payment.id ? "Voiding…" : "Void"}
                       </button>
                     ) : (
-                      <span className="text-xs text-zinc-400">—</span>
+                      <span className="text-sm text-zinc-400">—</span>
                     )}
                   </td>
                 )}

@@ -13,7 +13,7 @@ type Props = {
 };
 
 const inputClass =
-  "mt-1.5 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-base text-black outline-none transition-colors placeholder:text-zinc-400 focus:border-black focus-visible:ring-2 focus-visible:ring-black/10 dark:border-white/15 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white";
+  "mt-0 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-base text-black outline-none transition-colors placeholder:text-zinc-400 focus:border-black focus-visible:ring-2 focus-visible:ring-black/10 dark:border-white/15 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white";
 
 export function RecordPaymentForm({
   invoiceId,
@@ -40,7 +40,7 @@ export function RecordPaymentForm({
       action={formAction}
       className="rounded-2xl border border-black/10 p-5 dark:border-white/10"
     >
-      <h3 className="text-lg font-semibold text-black dark:text-white">Record payment</h3>
+      <h3 className="text-xl font-semibold text-black dark:text-white">Record payment</h3>
       <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
         Record cash, bank transfer, or any manual payment. Balance updates automatically
       </p>

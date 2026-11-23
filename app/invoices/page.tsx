@@ -51,7 +51,7 @@ export default async function InvoicesPage() {
 
       {invoices.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-black/15 px-6 py-20 text-center dark:border-white/15">
-          <h2 className="text-lg font-semibold text-black dark:text-white">
+          <h2 className="text-xl font-semibold text-black dark:text-white">
             No invoices yet
           </h2>
           <p className="mt-2 text-base text-zinc-600 dark:text-zinc-300">
@@ -67,7 +67,7 @@ export default async function InvoicesPage() {
       ) : (
         <div className="overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
           <table className="w-full text-left text-base">
-            <thead className="bg-black font-mono text-[10px] uppercase tracking-widest text-white dark:bg-white dark:text-black">
+            <thead className="bg-black font-mono text-xs tracking-wide text-white dark:bg-white dark:text-black">
               <tr>
                 <th className="px-5 py-3 font-semibold">Number</th>
                 <th className="px-5 py-3 font-semibold">Client</th>
