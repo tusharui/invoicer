@@ -1,4 +1,4 @@
-import { Check, FileText } from "lucide-react";
+import { Check } from "lucide-react";
 
 export type PreviewStatus = "Paid" | "Sent" | "Draft";
 
@@ -63,23 +63,11 @@ export function InvoicePreview({
   return (
     <div className="relative mx-auto w-full max-w-[520px] lg:mx-0">
       <div className="overflow-hidden rounded-2xl border border-black/10 bg-white dark:border-white/10 dark:bg-[#0c0c0e]">
-        {/* window bar */}
-        <div className="flex items-center justify-between border-b border-black/5 bg-zinc-50 px-5 py-3 dark:border-white/5 dark:bg-white/5">
-          <div className="flex items-center gap-1.5" aria-hidden>
-            <span className="size-2.5 rounded-full bg-red-400/80" />
-            <span className="size-2.5 rounded-full bg-amber-400/80" />
-            <span className="size-2.5 rounded-full bg-emerald-400/80" />
-          </div>
-          <span className="font-mono text-[11px] tracking-[0.2em] text-zinc-400">
-            Invoicer
-          </span>
-        </div>
-
         <div className="p-5 sm:p-7">
           {/* invoice title + status */}
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] tracking-[0.22em] text-zinc-400">
+              <p className="text-sm tracking-[0.22em] text-zinc-400">
                 Invoice
               </p>
               <p className="mt-1 text-2xl font-semibold tracking-tight text-black dark:text-white">
@@ -87,7 +75,7 @@ export function InvoicePreview({
               </p>
             </div>
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[11px] font-medium tracking-wide ${statusClass[data.status]}`}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-sm font-medium tracking-wide ${statusClass[data.status]}`}
             >
               {data.status === "Paid" ? <Check className="size-3" /> : null}
               {data.status}
@@ -97,24 +85,24 @@ export function InvoicePreview({
           {/* from / bill to */}
           <div className="mt-7 grid grid-cols-2 gap-5">
             <div>
-              <p className="font-mono text-[9px] tracking-wide text-zinc-400">
+              <p className="text-base tracking-wide text-black dark:text-white">
                 From
               </p>
-              <p className="mt-2 text-sm font-medium text-black dark:text-white">
+              <p className="mt-2 text-base font-medium text-black dark:text-white">
                 {data.fromName}
               </p>
-              <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="mt-0.5 text-base text-black dark:text-white">
                 {data.fromEmail}
               </p>
             </div>
             <div>
-              <p className="font-mono text-[9px] tracking-wide text-zinc-400">
+              <p className="text-base tracking-wide text-black dark:text-white">
                 Bill to
               </p>
-              <p className="mt-2 text-sm font-medium text-black dark:text-white">
+              <p className="mt-2 text-base font-medium text-black dark:text-white">
                 {data.toName}
               </p>
-              <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="mt-0.5 text-base text-black dark:text-white">
                 {data.toEmail}
               </p>
             </div>
@@ -123,27 +111,27 @@ export function InvoicePreview({
           {/* dates */}
           <div className="mt-6 flex gap-10 border-y border-black/5 py-3 dark:border-white/5">
             <div>
-              <p className="font-mono text-[9px] tracking-wide text-zinc-400">
+              <p className="text-base tracking-wide text-black dark:text-white">
                 Issued
               </p>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+              <p className="mt-1 text-base text-black dark:text-white">
                 {data.issued}
               </p>
             </div>
             <div>
-              <p className="font-mono text-[9px] tracking-wide text-zinc-400">
+              <p className="text-base tracking-wide text-black dark:text-white">
                 Due
               </p>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+              <p className="mt-1 text-base text-black dark:text-white">
                 {data.due}
               </p>
             </div>
           </div>
 
           {/* line items */}
-          <table className="mt-4 w-full text-left text-sm">
+          <table className="mt-4 w-full text-left text-base">
             <thead>
-              <tr className="font-mono text-[9px] tracking-wide text-zinc-400">
+              <tr className="text-base tracking-wide text-black dark:text-white">
                 <th className="pb-2 font-medium">Description</th>
                 <th className="pb-2 text-right font-medium">Qty</th>
                 <th className="pb-2 text-right font-medium">Amount</th>
@@ -152,13 +140,13 @@ export function InvoicePreview({
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {data.items.map((item) => (
                 <tr key={item.description}>
-                  <td className="py-2.5 text-zinc-700 dark:text-zinc-200">
+                  <td className="py-2.5 text-base text-black dark:text-white">
                     {item.description}
                   </td>
-                  <td className="py-2.5 text-right tabular-nums text-zinc-500 dark:text-zinc-400">
+                  <td className="py-2.5 text-right tabular-nums text-base text-black dark:text-white">
                     {item.qty}
                   </td>
-                  <td className="py-2.5 text-right font-medium tabular-nums text-black dark:text-white">
+                  <td className="py-2.5 text-right font-medium tabular-nums text-base text-black dark:text-white">
                     {item.amount}
                   </td>
                 </tr>
@@ -167,16 +155,16 @@ export function InvoicePreview({
           </table>
 
           {/* totals */}
-          <div className="ml-auto mt-5 w-full max-w-[210px] space-y-2 text-sm">
-            <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
+          <div className="ml-auto mt-5 w-full max-w-[210px] space-y-2 text-base text-black dark:text-white">
+            <div className="flex justify-between">
               <span>Subtotal</span>
               <span className="tabular-nums">{data.subtotal}</span>
             </div>
-            <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
+            <div className="flex justify-between">
               <span>{data.taxLabel}</span>
               <span className="tabular-nums">{data.tax}</span>
             </div>
-            <div className="flex justify-between border-t border-black/10 pt-2 font-semibold text-black dark:border-white/10 dark:text-white">
+            <div className="flex justify-between border-t border-black/10 pt-2 font-semibold dark:border-white/10">
               <span>Total</span>
               <span className="tabular-nums">{data.total}</span>
             </div>
@@ -184,12 +172,7 @@ export function InvoicePreview({
         </div>
       </div>
 
-      {/* floating "emailed as PDF" hint */}
-      {data.status !== "Draft" ? (
-        <div className="absolute -bottom-5 -right-2 hidden items-center gap-2 rounded-full border border-black/10 bg-white px-3.5 py-2 text-sm font-medium text-zinc-700 sm:flex dark:border-white/15 dark:bg-zinc-900 dark:text-zinc-200">
-          <FileText className="size-3.5" /> Emailed as PDF
-        </div>
-      ) : null}
+
     </div>
   );
 }

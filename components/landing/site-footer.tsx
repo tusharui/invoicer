@@ -7,13 +7,13 @@ const links = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-white/10">
+    <footer className="border-t border-black/10">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-10 sm:flex-row sm:items-start sm:justify-between sm:px-8">
         <div>
-          <p className="text-xl font-semibold tracking-tight text-white">
+          <p className="text-xl font-semibold tracking-tight text-black">
             Invoicer
           </p>
-          <p className="mt-1 text-sm text-zinc-300">
+          <p className="mt-1 text-sm text-zinc-600">
             Simple billing without the extra hassle
           </p>
         </div>
@@ -30,7 +30,7 @@ export function SiteFooter() {
         </nav>
       </div>
       <div className="mx-auto w-full max-w-6xl px-5 pb-8 sm:px-8">
-        <p className="font-mono text-xs tracking-wide text-zinc-400">
+        <p className="font-mono text-xs tracking-wide text-zinc-500">
           © 2026 Invoicer
         </p>
       </div>

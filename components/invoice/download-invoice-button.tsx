@@ -158,18 +158,18 @@ export function buildInvoiceSvg(props: InvoiceDownloadData): { svg: string; heig
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
     <style>
-      .lbl { font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: bold; letter-spacing: 2px; fill: #000000; }
-      .name { font-family: 'Geist Mono', monospace; font-size: 18px; font-weight: bold; fill: #000000; }
-      .muted { font-family: 'Geist Mono', monospace; font-size: 15px; fill: #000000; }
-      .cell { font-family: 'Geist Mono', monospace; font-size: 15px; fill: #000000; }
+      .lbl { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: bold; letter-spacing: 2px; fill: #000000; }
+      .name { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: bold; fill: #000000; }
+      .muted { font-family: 'Inter', sans-serif; font-size: 16px; fill: #000000; }
+      .cell { font-family: 'Inter', sans-serif; font-size: 16px; fill: #000000; }
       .strong { font-weight: bold; fill: #000000; }
-      .total { font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: bold; fill: #000000; }
-      .head { font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: bold; letter-spacing: 1px; fill: #000000; }
+      .total { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: bold; fill: #000000; }
+      .head { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: bold; letter-spacing: 1px; fill: #000000; }
     </style>
     <rect width="${width}" height="${height}" fill="#ffffff" />
-    <text x="${margin}" y="70" font-family="Geist Mono, monospace" font-size="38" font-weight="bold" letter-spacing="2" fill="#000000">INVOICE</text>
-    <text x="${margin}" y="104" font-family="Geist Mono, monospace" font-size="20" font-weight="bold" fill="#000000">${esc(props.number)}</text>
-    <text x="${margin}" y="160" font-family="Geist Mono, monospace" font-size="15" fill="#000000">Issued ${esc(props.issueDate)}   ·   Due ${esc(props.dueDate)}${props.referenceNumber ? `   ·   Ref ${esc(props.referenceNumber)}` : ""}</text>
+    <text x="${margin}" y="70" font-family="Inter, sans-serif" font-size="24" font-weight="bold" letter-spacing="2" fill="#000000">INVOICE</text>
+    <text x="${margin}" y="104" font-family="Inter, sans-serif" font-size="16" font-weight="bold" fill="#000000">${esc(props.number)}</text>
+    <text x="${margin}" y="160" font-family="Inter, sans-serif" font-size="16" fill="#000000">Issued ${esc(props.issueDate)}   ·   Due ${esc(props.dueDate)}${props.referenceNumber ? `   ·   Ref ${esc(props.referenceNumber)}` : ""}</text>
     <line x1="${margin}" y1="182" x2="${right}" y2="182" stroke="#000000" stroke-width="1" />
     ${partyBlock(props.from, margin, "BILL FROM")}
     ${partyBlock(props.to, 430, "BILL TO")}
@@ -202,8 +202,8 @@ export function buildInvoiceSvg(props: InvoiceDownloadData): { svg: string; heig
 export async function downloadInvoicePng(props: InvoiceDownloadData): Promise<void> {
   if (document.fonts?.load) {
     try {
-      await document.fonts.load("12px 'Geist Mono'");
-      await document.fonts.load("700 12px 'Geist Mono'");
+      await document.fonts.load("12px 'Inter'");
+      await document.fonts.load("700 12px 'Inter'");
       await document.fonts.ready;
     } catch {
       // Fall back to the generic monospace stack.

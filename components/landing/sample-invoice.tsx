@@ -103,9 +103,9 @@ export function SampleInvoice() {
                 role="tab"
                 aria-selected={active === index}
                 onClick={() => setActive(index)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-white/30 ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/30 ${
                   active === index
-                    ? "bg-white text-black"
+                    ? "bg-black text-white"
                     : "text-zinc-600 hover:text-black dark:text-zinc-300 dark:hover:text-white"
                 }`}
               >

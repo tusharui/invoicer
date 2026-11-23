@@ -3,7 +3,7 @@ import {
   ImageDown,
   LockKeyhole,
   Mail,
-  Moon,
+  Sparkles,
   Percent,
 } from "lucide-react";
 import { SectionHeading } from "./section-heading";
@@ -34,10 +34,10 @@ const features = [
       "Send a polished PDF straight to your client's inbox without leaving the app",
   },
   {
-    icon: Moon,
-    title: "Dark mode",
+    icon: Sparkles,
+    title: "Clean design",
     description:
-      "Follows your system theme, or switch whenever you like from the navbar",
+      "A simple, professional layout that keeps your invoices easy to read",
   },
   {
     icon: LockKeyhole,
@@ -68,13 +68,13 @@ export function Features() {
                 key={feature.title}
                 className="rounded-2xl border border-black/10 p-6 dark:border-white/10"
               >
-                <span className="flex size-10 items-center justify-center rounded-xl border border-white/10">
-                  <Icon className="size-5 text-white" />
+                <span className="flex size-10 items-center justify-center rounded-xl border border-black/10">
+                  <Icon className="size-5 text-black" />
                 </span>
-                <h3 className="mt-5 text-base font-semibold text-white">
+                <h3 className="mt-5 text-base font-semibold text-black">
                   {feature.title}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-300">
+                <p className="mt-2 text-sm leading-6 text-zinc-600">
                   {feature.description}
                 </p>
               </div>

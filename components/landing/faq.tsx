@@ -43,9 +43,9 @@ export function Faq() {
             <details key={faq.question} className="group py-5">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-medium text-black [&::-webkit-details-marker]:hidden dark:text-white">
                 {faq.question}
-                <Plus className="size-4 shrink-0 text-zinc-400 transition-transform group-open:rotate-45" />
+                <Plus className="size-4 shrink-0 text-zinc-500 transition-transform group-open:rotate-45" />
               </summary>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
                 {faq.answer}
               </p>
             </details>

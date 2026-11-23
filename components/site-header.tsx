@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { Suspense } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { CREATE_INVOICE_PATH } from "@/lib/routes";
 
 function SiteHeaderInner() {
@@ -18,7 +17,6 @@ function SiteHeaderInner() {
         Invoicer
       </span>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-        <ThemeToggle />
         <Suspense>
           <Show when="signed-out">
             <div className="flex items-center gap-1.5 sm:gap-2">

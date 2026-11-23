@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, PlusCircle, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Show, UserButton } from "@clerk/nextjs";
 import { Suspense, useState } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -69,8 +68,7 @@ function AppSidebarInner() {
       </nav>
 
       <div className={cn("mt-auto border-t border-black/10 pt-4 dark:border-white/10", collapsed ? "px-0" : "px-2")}>
-        <div className={cn("flex items-center", collapsed ? "flex-col gap-3" : "justify-between")}>
-          <ThemeToggle />
+        <div className={cn("flex items-center", collapsed ? "flex-col gap-3" : "justify-end")}>
           <Suspense>
             <Show when="signed-in">
               <UserButton />

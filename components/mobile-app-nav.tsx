@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, PlusCircle } from "lucide-react";
 import { Show, UserButton } from "@clerk/nextjs";
 import { Suspense } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -44,7 +43,6 @@ function MobileAppNavInner() {
           })}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <ThemeToggle />
           <Suspense>
             <Show when="signed-in">
               <UserButton />

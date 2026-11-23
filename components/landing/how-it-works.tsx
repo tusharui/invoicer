@@ -1,24 +1,20 @@
-import { Calculator, FileText, FolderCheck } from "lucide-react";
 import { SectionHeading } from "./section-heading";
 
 const steps = [
   {
     number: "01",
-    icon: FileText,
     title: "Add your details",
     description:
       "Enter your business and client details, invoice number, and dates. Notes and terms go here too",
   },
   {
     number: "02",
-    icon: Calculator,
     title: "Build & download",
     description:
       "Add line items with quantity, rate and tax. Watch the total update live, then download your invoice instantly",
   },
   {
     number: "03",
-    icon: FolderCheck,
     title: "Save & track",
     description:
       "Create a free account to save invoices, send them by email, and keep everything organized in one place",
@@ -33,36 +29,33 @@ export function HowItWorks() {
     >
       <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
         <SectionHeading
-          eyebrow="How it works"
-          title="From blank page to sent in three steps"
-          description="No setup call, no templates to wrestle with. Just the fields you need and a clean invoice at the end"
+          eyebrow=""
+          title="How it works"
+          titleClassName="text-5xl sm:text-6xl md:text-7xl"
         />
 
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {steps.map((step) => {
-            const Icon = step.icon;
-            return (
-              <div
-                key={step.number}
-                className="rounded-2xl border border-black/10 p-6 dark:border-white/10"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-sm text-zinc-400">
-                    {step.number}
-                  </span>
-                  <span className="flex size-10 items-center justify-center rounded-xl border border-white/10">
-                    <Icon className="size-5 text-white" />
-                  </span>
-                </div>
-                <h3 className="mt-6 text-xl font-semibold text-white">
+        <div className="mt-14 divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
+          {steps.map((step) => (
+            <div
+              key={step.number}
+              className="group grid gap-3 py-8 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-4 sm:py-10 md:gap-6"
+            >
+              <div className="flex items-start">
+                <span className="-mt-2 font-mono text-8xl font-semibold leading-none tracking-tight text-black sm:-mt-3 sm:text-9xl md:-mt-4 md:text-[10rem] dark:text-white">
+                  {step.number}
+                </span>
+              </div>
+
+              <div className="max-w-2xl sm:pt-2 md:pt-3">
+                <h3 className="text-3xl font-medium tracking-tight text-black sm:text-4xl md:text-5xl dark:text-white">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-300">
+                <p className="mt-3 text-lg leading-8 text-zinc-600 sm:text-xl dark:text-zinc-300">
                   {step.description}
                 </p>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     </section>
