@@ -3,8 +3,10 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { computeBilling } from "@/lib/invoice-billing";
 import { monoLabelClass } from "@/lib/utils";
 import { Money } from "@/components/invoice/money";
+import { InvoiceStatusBadge } from "@/components/invoice/invoice-status-badge";
 
 // Reads the Clerk session (cookies) on every request.
 export const instant = false;
@@ -69,42 +71,62 @@ export default async function InvoicesPage() {
               <tr>
                 <th className="px-5 py-3 font-semibold">Number</th>
                 <th className="px-5 py-3 font-semibold">Client</th>
-                <th className="px-5 py-3 font-semibold">Issued</th>
+                <th className="px-5 py-3 font-semibold">Status</th>
                 <th className="px-5 py-3 font-semibold">Due</th>
+                <th className="px-5 py-3 text-right font-semibold">Balance</th>
                 <th className="px-5 py-3 text-right font-semibold">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
-              {invoices.map((invoice) => (
-                <tr
-                  key={invoice.id}
-                  className=""
-                >
-                  <td className="px-5 py-4">
-                    <Link
-                      href={`/invoices/${invoice.id}`}
-                      className="font-medium text-black underline-offset-4 hover:underline dark:text-white"
-                    >
-                      {invoice.number}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
-                    {invoice.client.name}
-                  </td>
-                  <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
-                    {formatDate(invoice.issueDate)}
-                  </td>
-                  <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
-                    {formatDate(invoice.dueDate)}
-                  </td>
-                  <td className="px-5 py-4 text-right font-medium text-black dark:text-white">
-                    <Money
-                      value={invoice.total}
-                      currency={invoice.currency}
-                    />
-                  </td>
-                </tr>
-              ))}
+              {invoices.map((invoice) => {
+                const billing = computeBilling({
+                  total: String(invoice.total),
+                  payments: [
+                    {
+                      amount: String(invoice.amountPaid),
+                      status: "RECORDED",
+                    },
+                  ],
+                  currentStatus: invoice.status,
+                  dueDate: invoice.dueDate,
+                });
+                return (
+                  <tr key={invoice.id}>
+                    <td className="px-5 py-4">
+                      <Link
+                        href={`/invoices/${invoice.id}`}
+                        className="font-medium text-black underline-offset-4 hover:underline dark:text-white"
+                      >
+                        {invoice.number}
+                      </Link>
+                    </td>
+                    <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
+                      {invoice.client.name}
+                    </td>
+                    <td className="px-5 py-4">
+                      <InvoiceStatusBadge
+                        status={billing.status}
+                        isOverdue={billing.isOverdue}
+                      />
+                    </td>
+                    <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
+                      {formatDate(invoice.dueDate)}
+                    </td>
+                    <td className="px-5 py-4 text-right font-medium text-black dark:text-white">
+                      <Money
+                        value={billing.balanceDue}
+                        currency={invoice.currency}
+                      />
+                    </td>
+                    <td className="px-5 py-4 text-right font-medium text-black dark:text-white">
+                      <Money
+                        value={invoice.total}
+                        currency={invoice.currency}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

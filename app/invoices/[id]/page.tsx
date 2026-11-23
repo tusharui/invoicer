@@ -2,10 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { computeBilling } from "@/lib/invoice-billing";
 import { monoLabelClass } from "@/lib/utils";
 import { DownloadInvoiceButton } from "@/components/invoice/download-invoice-button";
 import { SendInvoiceButton } from "@/components/invoice/send-invoice-button";
 import { Money } from "@/components/invoice/money";
+import { InvoiceStatusBadge } from "@/components/invoice/invoice-status-badge";
+import { RecordPaymentForm } from "@/components/invoice/record-payment-form";
+import { PaymentsTable } from "@/components/invoice/payments-table";
 
 // Reads the Clerk session (cookies) on every request.
 export const instant = false;
@@ -51,12 +55,28 @@ export default async function InvoiceDetailPage({
   const { id } = await params;
   const invoice = await prisma.invoice.findFirst({
     where: { id, userId: dbUser.id },
-    include: { items: { orderBy: { position: "asc" } }, activities: true },
+    include: {
+      items: { orderBy: { position: "asc" } },
+      activities: { orderBy: { createdAt: "desc" } },
+      payments: { orderBy: { paidAt: "desc" } },
+    },
   });
   if (!invoice) notFound();
 
   const from = snapshot(invoice.fromSnapshot);
   const to = snapshot(invoice.toSnapshot);
+  const billing = computeBilling({
+    total: String(invoice.total),
+    payments: invoice.payments.map((payment) => ({
+      amount: String(payment.amount),
+      status: payment.status,
+    })),
+    currentStatus: invoice.status,
+    dueDate: invoice.dueDate,
+  });
+  const canRecordPayment = !["DRAFT", "VOID", "SUPERSEDED", "PAID"].includes(
+    billing.status,
+  );
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-12 sm:px-8 sm:py-16">
@@ -69,9 +89,12 @@ export default async function InvoiceDetailPage({
 
       <div className="mt-6 flex flex-wrap items-start justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-black sm:text-4xl dark:text-white">
-            Invoice {invoice.number}
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-3xl font-semibold tracking-tight text-black sm:text-4xl dark:text-white">
+              Invoice {invoice.number}
+            </h1>
+            <InvoiceStatusBadge status={billing.status} isOverdue={billing.isOverdue} />
+          </div>
           <p className="mt-2 text-base text-zinc-600 dark:text-zinc-300">
             Issued {formatDate(invoice.issueDate)} · Due{" "}
             {formatDate(invoice.dueDate)}
@@ -113,6 +136,27 @@ export default async function InvoiceDetailPage({
             notes={invoice.notes}
             terms={invoice.terms}
           />
+        </div>
+      </div>
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
+          <p className={monoLabelClass}>Total</p>
+          <p className="mt-3 text-2xl font-semibold text-black dark:text-white">
+            <Money value={invoice.total} currency={invoice.currency} />
+          </p>
+        </div>
+        <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
+          <p className={monoLabelClass}>Amount paid</p>
+          <p className="mt-3 text-2xl font-semibold text-black dark:text-white">
+            <Money value={billing.amountPaid} currency={invoice.currency} />
+          </p>
+        </div>
+        <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
+          <p className={monoLabelClass}>Balance due</p>
+          <p className="mt-3 text-2xl font-semibold text-black dark:text-white">
+            <Money value={billing.balanceDue} currency={invoice.currency} />
+          </p>
         </div>
       </div>
 
@@ -219,6 +263,41 @@ export default async function InvoiceDetailPage({
           </div>
         </dl>
       </div>
+
+      <section className="mt-8 space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className={monoLabelClass}>Payments</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-black dark:text-white">
+              Payment history
+            </h2>
+          </div>
+        </div>
+
+        <PaymentsTable
+          invoiceId={invoice.id}
+          currency={invoice.currency}
+          canManage={!["VOID", "SUPERSEDED"].includes(billing.status)}
+          payments={invoice.payments.map((payment) => ({
+            id: payment.id,
+            amount: String(payment.amount),
+            method: payment.method,
+            status: payment.status,
+            paidAt: formatDate(payment.paidAt),
+            reference: payment.reference,
+            note: payment.note,
+            voidReason: payment.voidReason,
+          }))}
+        />
+
+        <RecordPaymentForm
+          invoiceId={invoice.id}
+          balanceDue={billing.balanceDue.toFixed(2)}
+          currency={invoice.currency}
+          defaultPaidAt={new Date().toISOString().slice(0, 10)}
+          disabled={!canRecordPayment}
+        />
+      </section>
 
       {(invoice.notes || invoice.terms) && (
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
