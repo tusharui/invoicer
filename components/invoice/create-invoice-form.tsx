@@ -390,6 +390,21 @@ export function CreateInvoiceForm({
               className={inputClass}
             />
           </div>
+          <div className="sm:col-span-2 lg:col-span-3">
+            <label className={labelClass} htmlFor="paymentUrl">
+              Payment link (optional)
+            </label>
+            <input
+              id="paymentUrl"
+              name="paymentUrl"
+              type="url"
+              className={inputClass}
+              placeholder="https://pay.example.com/your-link"
+            />
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              Any payment link you already have. A &quot;Pay now&quot; button will be included when you send the invoice.
+            </p>
+          </div>
         </div>
       </section>
 

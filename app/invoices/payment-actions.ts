@@ -283,3 +283,55 @@ export async function voidPayment(
     return { error: "Could not void payment. Please try again." };
   }
 }
+
+export async function updatePaymentUrl(
+  _previousState: PaymentActionState,
+  formData: FormData,
+): Promise<PaymentActionState> {
+  const invoiceId = text(formData.get("invoiceId"));
+  if (!invoiceId) return { error: "Invoice not found." };
+
+  const owned = await getOwnedInvoice(invoiceId);
+  if ("error" in owned) return { error: owned.error };
+  const { invoice } = owned;
+
+  if (["VOID", "SUPERSEDED"].includes(invoice.status)) {
+    return { error: "Payment link cannot be changed on this invoice." };
+  }
+
+  const raw = text(formData.get("paymentUrl"));
+  let paymentUrl: string | null = null;
+  if (raw) {
+    try {
+      const url = new URL(raw);
+      if (url.protocol !== "https:" && url.protocol !== "http:") {
+        return { error: "Enter a valid payment link (https://...)." };
+      }
+      paymentUrl = url.toString();
+    } catch {
+      return { error: "Enter a valid payment link (https://...)." };
+    }
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.invoice.update({
+        where: { id: invoice.id },
+        data: { paymentUrl },
+      });
+      await tx.invoiceActivity.create({
+        data: {
+          invoiceId: invoice.id,
+          type: "PAYMENT_LINK_UPDATED",
+          message: paymentUrl ? "Payment link updated." : "Payment link removed.",
+          metadata: { paymentUrl },
+        },
+      });
+    });
+    revalidateInvoice(invoice.id);
+    return { success: paymentUrl ? "Payment link updated." : "Payment link removed." };
+  } catch (error) {
+    console.error("Failed to update payment link", error);
+    return { error: "Could not update payment link. Please try again." };
+  }
+}

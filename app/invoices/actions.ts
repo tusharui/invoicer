@@ -56,6 +56,18 @@ function toDate(value: FormDataEntryValue | null): Date {
   return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
 }
 
+function parsePaymentUrl(value: FormDataEntryValue | null): string | null | undefined {
+  const raw = text(value);
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return undefined;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
 export async function createInvoice(
   _previousState: CreateInvoiceState,
   formData: FormData,
@@ -107,6 +119,11 @@ export async function createInvoice(
   );
   const discount = round2(((subtotal + taxAmount) * discountPercent) / 100);
   const total = round2(subtotal + taxAmount - discount);
+
+  const paymentUrl = parsePaymentUrl(formData.get('paymentUrl'));
+  if (paymentUrl === undefined) {
+    return { error: 'Enter a valid payment link (https://...).' };
+  }
 
   const clerkUser = await currentUser();
   const email =
@@ -202,6 +219,7 @@ export async function createInvoice(
         balanceDue: total,
         notes: text(formData.get('notes')) || null,
         terms: text(formData.get('terms')) || null,
+        paymentUrl,
         fromSnapshot: business
           ? {
               name: business.name,
@@ -342,6 +360,21 @@ export async function sendInvoice(
       },
     });
 
+    const balanceDue = Number(invoice.balanceDue ?? invoice.total);
+    const safePaymentUrl = invoice.paymentUrl
+      ? invoice.paymentUrl.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      : null;
+    const payNowBlock = safePaymentUrl
+      ? `
+          <p style="margin:24px 0 8px">
+            <a href="${safePaymentUrl}" style="display:inline-block;background:#000;color:#fff;text-decoration:none;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600">Pay now</a>
+          </p>
+          <p style="color:#555;font-size:13px;line-height:1.6;margin:0 0 24px">
+            Or copy this link: <a href="${safePaymentUrl}" style="color:#111">${safePaymentUrl}</a>
+          </p>
+        `
+      : "";
+
     await transporter.sendMail({
       from: `"Invoicer" <${gmailUser}>`,
       to: recipient,
@@ -355,9 +388,10 @@ export async function sendInvoice(
           <p style="font-size:14px;line-height:1.6">
             Hi ${to.name || 'there'},<br /><br />
             Please find invoice <strong>${invoice.number}</strong> attached.
-            The total due is <strong>${invoice.currency} ${Number(invoice.total).toFixed(2)}</strong>,
+            Balance due is <strong>${invoice.currency} ${balanceDue.toFixed(2)}</strong>,
             payable by ${displayDate(invoice.dueDate)}.
           </p>
+          ${payNowBlock}
           <p style="color:#555;font-size:13px;margin-top:32px">
             Sent by ${from.name || 'Invoicer'}${from.email ? ` (${from.email})` : ''}.
           </p>

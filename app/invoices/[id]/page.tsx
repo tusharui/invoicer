@@ -10,6 +10,7 @@ import { Money } from "@/components/invoice/money";
 import { InvoiceStatusBadge } from "@/components/invoice/invoice-status-badge";
 import { RecordPaymentForm } from "@/components/invoice/record-payment-form";
 import { PaymentsTable } from "@/components/invoice/payments-table";
+import { PaymentLinkCard } from "@/components/invoice/payment-link-card";
 
 // Reads the Clerk session (cookies) on every request.
 export const instant = false;
@@ -189,6 +190,14 @@ export default async function InvoiceDetailPage({
             {to.addressLine1}
           </p>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <PaymentLinkCard
+          invoiceId={invoice.id}
+          paymentUrl={invoice.paymentUrl}
+          disabled={["VOID", "SUPERSEDED"].includes(billing.status)}
+        />
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
