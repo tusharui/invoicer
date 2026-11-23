@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Building2, Plus, Trash2, User } from "lucide-react";
 import { SignUpButton } from "@clerk/nextjs";
 import {
   createInvoice,
@@ -14,9 +14,12 @@ import { monoLabelClass as labelClass } from "@/lib/utils";
 type Item = {
   id: string;
   description: string;
+  unit: string;
   quantity: string;
   unitPrice: string;
+  discount: string;
   taxRate: string;
+  taxName: string;
 };
 
 type Props = {
@@ -50,17 +53,22 @@ function newItem(): Item {
   return {
     id: Math.random().toString(36).slice(2),
     description: "",
+    unit: "",
     quantity: "1",
     unitPrice: "0",
+    discount: "0",
     taxRate: "0",
+    taxName: "",
   };
 }
 
-function money(value: number): string {
-  return value.toLocaleString("en-US", {
+function money(value: number, currency = "USD"): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  });
+  }).format(value);
 }
 
 export function CreateInvoiceForm({
@@ -74,10 +82,26 @@ export function CreateInvoiceForm({
   >(createInvoice, {});
   const [items, setItems] = useState<Item[]>([newItem()]);
   const [discount, setDiscount] = useState("0");
+  const [clientType, setClientType] = useState<"individual" | "company">("individual");
+  const [issueDate, setIssueDate] = useState(defaultIssueDate);
+  const [dueDate, setDueDate] = useState(defaultDueDate);
+  const [dueTerm, setDueTerm] = useState<number | "custom">(14);
+  const [currency, setCurrency] = useState("USD");
+  const [showFromDetails, setShowFromDetails] = useState(false);
+  const [showBillToDetails, setShowBillToDetails] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   const [demoError, setDemoError] = useState<string | null>(null);
   const [demoGenerated, setDemoGenerated] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+
+  function applyDueTerm(days: number | "custom", baseIssueDate = issueDate) {
+    setDueTerm(days);
+    if (days === "custom") return;
+    const base = new Date(`${baseIssueDate}T00:00:00`);
+    if (Number.isNaN(base.getTime())) return;
+    base.setDate(base.getDate() + days);
+    setDueDate(base.toISOString().slice(0, 10));
+  }
 
   useEffect(() => {
     if (mode !== "demo") return;
@@ -89,27 +113,26 @@ export function CreateInvoiceForm({
   }, [mode]);
 
   const totals = useMemo(() => {
-    const subtotal = items.reduce(
-      (sum, item) => sum + Number(item.quantity || 0) * Number(item.unitPrice || 0),
-      0,
-    );
-    const tax = items.reduce(
-      (sum, item) =>
-        sum +
-        (Number(item.quantity || 0) *
-          Number(item.unitPrice || 0) *
-          Number(item.taxRate || 0)) /
-          100,
-      0,
-    );
+    const lineTotals = items.map((item) => {
+      const base = Number(item.quantity || 0) * Number(item.unitPrice || 0);
+      const lineDiscount = Math.min(Math.max(Number(item.discount || 0), 0), Math.max(base, 0));
+      const net = base - lineDiscount;
+      const tax = (net * Number(item.taxRate || 0)) / 100;
+      return { base, lineDiscount, net, tax };
+    });
+    const subtotal = lineTotals.reduce((sum, l) => sum + l.base, 0);
+    const itemDiscount = lineTotals.reduce((sum, l) => sum + l.lineDiscount, 0);
+    const tax = lineTotals.reduce((sum, l) => sum + l.tax, 0);
     const discountPercent = Math.min(Math.max(Number(discount || 0), 0), 100);
-    const discountValue = Math.round((subtotal + tax) * discountPercent) / 100;
+    const taxableBase = Math.max(subtotal - itemDiscount + tax, 0);
+    const discountValue = Math.round(taxableBase * discountPercent) / 100;
     return {
       subtotal,
+      itemDiscount,
       tax,
       discountPercent,
       discount: discountValue,
-      total: subtotal + tax - discountValue,
+      total: subtotal - itemDiscount + tax - discountValue,
     };
   }, [items, discount]);
 
@@ -140,12 +163,19 @@ export function CreateInvoiceForm({
     const currency = text("currency") || "USD";
 
     const lineItems = items
-      .map((item) => ({
-        description: item.description.trim(),
-        quantity: Number(item.quantity || 0),
-        unitPrice: Number(item.unitPrice || 0),
-        taxRate: Number(item.taxRate || 0),
-      }))
+      .map((item) => {
+        const quantity = Number(item.quantity || 0);
+        const unitPrice = Number(item.unitPrice || 0);
+        const base = quantity * unitPrice;
+        const lineDiscount = Math.min(Math.max(Number(item.discount || 0), 0), Math.max(base, 0));
+        return {
+          description: item.description.trim(),
+          quantity,
+          unitPrice,
+          taxRate: Number(item.taxRate || 0),
+          lineDiscount,
+        };
+      })
       .filter((item) => item.description.length > 0);
 
     if (lineItems.length === 0) {
@@ -171,19 +201,16 @@ export function CreateInvoiceForm({
           email: text("clientEmail"),
           addressLine1: text("clientAddress"),
         },
-        items: lineItems.map((item) => {
-          const amount = item.quantity * item.unitPrice;
-          return {
-            description: item.description,
-            quantity: String(item.quantity),
-            unitPrice: item.unitPrice.toFixed(2),
-            taxRate: String(item.taxRate),
-            amount: amount.toFixed(2),
-          };
-        }),
+        items: lineItems.map((item) => ({
+          description: item.description,
+          quantity: String(item.quantity),
+          unitPrice: item.unitPrice.toFixed(2),
+          taxRate: String(item.taxRate),
+          amount: (item.quantity * item.unitPrice).toFixed(2),
+        })),
         subtotal: totals.subtotal.toFixed(2),
         taxAmount: totals.tax.toFixed(2),
-        discountAmount: totals.discount.toFixed(2),
+        discountAmount: (totals.itemDiscount + totals.discount).toFixed(2),
         total: totals.total.toFixed(2),
         notes: text("notes") || null,
         terms: text("terms") || null,
@@ -241,8 +268,37 @@ export function CreateInvoiceForm({
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="fromAddress">Address</label>
-                  <textarea id="fromAddress" name="fromAddress" rows={2} className={inputClass} placeholder="Street, city, country" />
+                  <input id="fromAddress" name="fromAddress" className={inputClass} placeholder="Street, city, country" />
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowFromDetails((v) => !v)}
+                  className="text-sm font-medium text-black underline-offset-4 hover:underline dark:text-white"
+                >
+                  {showFromDetails ? "Hide optional details" : "Add optional details"}
+                </button>
+                {showFromDetails && (
+                  <div className="space-y-3 rounded-xl border border-black/5 p-3 dark:border-white/10">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass} htmlFor="fromPhone">Phone (optional)</label>
+                        <input id="fromPhone" name="fromPhone" className={inputClass} placeholder="+1 555 000 0000" />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="fromTaxId">Tax ID (optional)</label>
+                        <input id="fromTaxId" name="fromTaxId" className={inputClass} placeholder="GST / VAT / Tax ID" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="fromWebsite">Website (optional)</label>
+                      <input id="fromWebsite" name="fromWebsite" className={inputClass} placeholder="https://acme.com" />
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="fromAddressLine2">Address line 2 (optional)</label>
+                      <input id="fromAddressLine2" name="fromAddressLine2" className={inputClass} placeholder="State, postal code, country" />
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -251,23 +307,89 @@ export function CreateInvoiceForm({
                 <span className="flex size-7 items-center justify-center rounded-full bg-black text-xs font-semibold text-white dark:bg-white dark:text-black">2</span>
                 <h2 className={headingClass}>Bill to</h2>
               </div>
+              <div className="mb-4 grid grid-cols-2 gap-2 rounded-xl bg-zinc-100 p-1 dark:bg-white/10">
+                <button
+                  type="button"
+                  aria-pressed={clientType === "individual"}
+                  onClick={() => setClientType("individual")}
+                  className={
+                    clientType === "individual"
+                      ? "inline-flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-black shadow-sm dark:bg-black dark:text-white"
+                      : "inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:text-black dark:text-zinc-300 dark:hover:text-white"
+                  }
+                >
+                  <User className="size-4" /> Individual
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={clientType === "company"}
+                  onClick={() => setClientType("company")}
+                  className={
+                    clientType === "company"
+                      ? "inline-flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-black shadow-sm dark:bg-black dark:text-white"
+                      : "inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:text-black dark:text-zinc-300 dark:hover:text-white"
+                  }
+                >
+                  <Building2 className="size-4" /> Company
+                </button>
+              </div>
               <div className="space-y-3">
-                <div>
-                  <label className={labelClass} htmlFor="clientName">Client name <span className="text-red-500">*</span></label>
-                  <input id="clientName" name="clientName" required className={inputClass} placeholder="John Doe" />
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="clientCompany">Company</label>
-                  <input id="clientCompany" name="clientCompany" className={inputClass} placeholder="Acme Corp" />
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="clientEmail">Email</label>
-                  <input id="clientEmail" name="clientEmail" type="email" className={inputClass} placeholder="john@acme.com" />
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="clientAddress">Address</label>
-                  <textarea id="clientAddress" name="clientAddress" rows={2} className={inputClass} placeholder="Street, city, country" />
-                </div>
+                {clientType === "individual" ? (
+                  <>
+                    <div>
+                      <label className={labelClass} htmlFor="clientName">Full name <span className="text-red-500">*</span></label>
+                      <input id="clientName" name="clientName" required className={inputClass} placeholder="John Doe" />
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="clientEmail">Email</label>
+                      <input id="clientEmail" name="clientEmail" type="email" className={inputClass} placeholder="john@example.com" />
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="clientAddress">Address</label>
+                      <textarea id="clientAddress" name="clientAddress" rows={2} className={inputClass} placeholder="Street, city, country" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className={labelClass} htmlFor="clientCompany">Company name <span className="text-red-500">*</span></label>
+                      <input id="clientCompany" name="clientCompany" required className={inputClass} placeholder="Acme Corp" />
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="clientName">Contact person <span className="text-red-500">*</span></label>
+                      <input id="clientName" name="clientName" required className={inputClass} placeholder="John Doe" />
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="clientEmail">Email</label>
+                      <input id="clientEmail" name="clientEmail" type="email" className={inputClass} placeholder="billing@acme.com" />
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="clientAddress">Address</label>
+                      <textarea id="clientAddress" name="clientAddress" rows={2} className={inputClass} placeholder="Street, city, country" />
+                    </div>
+                  </>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowBillToDetails((v) => !v)}
+                  className="text-sm font-medium text-black underline-offset-4 hover:underline dark:text-white"
+                >
+                  {showBillToDetails ? "Hide optional details" : "Add optional details"}
+                </button>
+                {showBillToDetails && (
+                  <div className="space-y-3 rounded-xl border border-black/5 p-3 dark:border-white/10">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass} htmlFor="clientPhone">Phone (optional)</label>
+                        <input id="clientPhone" name="clientPhone" className={inputClass} placeholder="+1 555 000 0000" />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="clientTaxId">Tax ID (optional)</label>
+                        <input id="clientTaxId" name="clientTaxId" className={inputClass} placeholder="GST / VAT / Tax ID" />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
           </div>
@@ -284,15 +406,65 @@ export function CreateInvoiceForm({
               </div>
               <div>
                 <label className={labelClass} htmlFor="issueDate">Issue date</label>
-                <input id="issueDate" name="issueDate" type="date" required defaultValue={defaultIssueDate} className={inputClass} />
+                <input
+                  id="issueDate"
+                  name="issueDate"
+                  type="date"
+                  required
+                  value={issueDate}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setIssueDate(next);
+                    if (dueTerm !== "custom") applyDueTerm(dueTerm, next);
+                  }}
+                  className={inputClass}
+                />
               </div>
-              <div>
+              <div className="sm:col-span-2 xl:col-span-2">
                 <label className={labelClass} htmlFor="dueDate">Due date</label>
-                <input id="dueDate" name="dueDate" type="date" required defaultValue={defaultDueDate} className={inputClass} />
+                <input
+                  id="dueDate"
+                  name="dueDate"
+                  type="date"
+                  required
+                  value={dueDate}
+                  onChange={(e) => {
+                    setDueDate(e.target.value);
+                    setDueTerm("custom");
+                  }}
+                  className={inputClass}
+                />
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {[7, 14, 30].map((days) => (
+                    <button
+                      key={days}
+                      type="button"
+                      onClick={() => applyDueTerm(days)}
+                      className={
+                        dueTerm === days
+                          ? "rounded-full bg-black px-3 py-1 text-xs font-medium text-white dark:bg-white dark:text-black"
+                          : "rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-zinc-600 hover:border-black dark:border-white/15 dark:text-zinc-300 dark:hover:border-white"
+                      }
+                    >
+                      Net {days}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setDueTerm("custom")}
+                    className={
+                      dueTerm === "custom"
+                        ? "rounded-full bg-black px-3 py-1 text-xs font-medium text-white dark:bg-white dark:text-black"
+                        : "rounded-full border border-black/10 px-3 py-1 text-xs font-medium text-zinc-600 hover:border-black dark:border-white/15 dark:text-zinc-300 dark:hover:border-white"
+                    }
+                  >
+                    Custom
+                  </button>
+                </div>
               </div>
               <div>
                 <label className={labelClass} htmlFor="currency">Currency</label>
-                <select id="currency" name="currency" defaultValue="USD" className={inputClass}>
+                <select id="currency" name="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} className={inputClass}>
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
                   <option value="GBP">GBP</option>
@@ -302,12 +474,20 @@ export function CreateInvoiceForm({
                 </select>
               </div>
               <div>
-                <label className={labelClass} htmlFor="discount">Discount (%)</label>
+                <label className={labelClass} htmlFor="discount">Global discount (%)</label>
                 <input id="discount" name="discount" type="number" min="0" max="100" step="0.01" placeholder="0" value={discount} onChange={(event) => setDiscount(event.target.value)} className={inputClass} />
               </div>
-              <div className="sm:col-span-2 xl:col-span-3">
+              <div>
+                <label className={labelClass} htmlFor="paymentLabel">Payment button label</label>
+                <input id="paymentLabel" name="paymentLabel" className={inputClass} placeholder="Pay now" />
+              </div>
+              <div className="sm:col-span-2">
                 <label className={labelClass} htmlFor="paymentUrl">Payment link (optional)</label>
                 <input id="paymentUrl" name="paymentUrl" type="url" className={inputClass} placeholder="https://pay.example.com/your-link" />
+              </div>
+              <div className="sm:col-span-2 xl:col-span-4">
+                <label className={labelClass} htmlFor="paymentInstructions">Payment instructions</label>
+                <textarea id="paymentInstructions" name="paymentInstructions" rows={2} className={inputClass} placeholder="Bank transfer, UPI, check details, or other payment instructions" />
               </div>
             </div>
           </section>
@@ -361,6 +541,20 @@ export function CreateInvoiceForm({
                       <input type="number" min="0" max="100" step="0.01" value={item.taxRate} onChange={(event) => updateItem(item.id, { taxRate: event.target.value })} className={inputClass} />
                     </div>
                   </div>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div>
+                      <label className={labelClass}>Unit (optional)</label>
+                      <input value={item.unit} onChange={(event) => updateItem(item.id, { unit: event.target.value })} className={inputClass} placeholder="hrs / pcs / service" />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Item discount (optional)</label>
+                      <input type="number" min="0" step="0.01" value={item.discount} onChange={(event) => updateItem(item.id, { discount: event.target.value })} className={inputClass} placeholder="0" />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Tax name (optional)</label>
+                      <input value={item.taxName} onChange={(event) => updateItem(item.id, { taxName: event.target.value })} className={inputClass} placeholder="GST / VAT" />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -384,23 +578,35 @@ export function CreateInvoiceForm({
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
                 <dt>Subtotal</dt>
-                <dd className="font-medium text-black dark:text-white">{money(totals.subtotal)}</dd>
+                <dd className="font-medium text-black dark:text-white">{money(totals.subtotal, currency)}</dd>
               </div>
               <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
                 <dt>Tax</dt>
-                <dd className="font-medium text-black dark:text-white">{money(totals.tax)}</dd>
+                <dd className="font-medium text-black dark:text-white">{money(totals.tax, currency)}</dd>
               </div>
+              {totals.itemDiscount > 0 && (
+                <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
+                  <dt>Item discounts</dt>
+                  <dd className="font-medium text-black dark:text-white">-{money(totals.itemDiscount, currency)}</dd>
+                </div>
+              )}
               <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
                 <dt>Discount ({totals.discountPercent}%)</dt>
-                <dd className="font-medium text-black dark:text-white">-{money(totals.discount)}</dd>
+                <dd className="font-medium text-black dark:text-white">-{money(totals.discount, currency)}</dd>
               </div>
               <div className="flex justify-between border-t border-black/10 pt-3 text-base font-semibold text-black dark:border-white/10 dark:text-white">
                 <dt>Total</dt>
-                <dd className="text-xl">{money(totals.total)}</dd>
+                <dd className="text-xl">{money(totals.total, currency)}</dd>
               </div>
             </dl>
 
             <div className="mt-4 border-t border-black/10 pt-4 dark:border-white/10">
+              {mode === "create" && (
+                <label className="mb-4 flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-300">
+                  <input type="checkbox" name="saveDefaults" className="mt-0.5 size-4 rounded border-black/20" />
+                  <span>Save business details and notes/terms as defaults</span>
+                </label>
+              )}
               {mode === "demo" ? (
                 <button
                   type="button"

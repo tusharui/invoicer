@@ -30,9 +30,12 @@ function jsonRecord(value: unknown): Record<string, string> {
 
 type LineItem = {
   description: string;
+  unit: string;
   quantity: number;
   unitPrice: number;
+  discountAmount: number;
   taxRate: number;
+  taxName: string;
 };
 
 function text(value: FormDataEntryValue | null, fallback = ''): string {
@@ -88,12 +91,20 @@ export async function createInvoice(
     const raw = JSON.parse(text(formData.get('items'), '[]'));
     if (Array.isArray(raw)) {
       lineItems = raw
-        .map((item) => ({
-          description: text(item?.description),
-          quantity: number(item?.quantity, 0),
-          unitPrice: number(item?.unitPrice, 0),
-          taxRate: number(item?.taxRate, 0),
-        }))
+        .map((item) => {
+          const quantity = number(item?.quantity, 0);
+          const unitPrice = number(item?.unitPrice, 0);
+          const base = quantity * unitPrice;
+          return {
+            description: text(item?.description),
+            unit: text(item?.unit),
+            quantity,
+            unitPrice,
+            discountAmount: Math.min(Math.max(number(item?.discount, 0), 0), Math.max(base, 0)),
+            taxRate: number(item?.taxRate, 0),
+            taxName: text(item?.taxName),
+          };
+        })
         .filter((item) => item.description.length > 0);
     }
   } catch {
@@ -104,26 +115,25 @@ export async function createInvoice(
     return { error: 'Add at least one line item' };
   }
 
-  const subtotal = round2(
-    lineItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0),
-  );
+  const subtotal = round2(lineItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0));
+  const itemDiscount = round2(lineItems.reduce((sum, item) => sum + item.discountAmount, 0));
   const taxAmount = round2(
-    lineItems.reduce(
-      (sum, item) => sum + (item.quantity * item.unitPrice * item.taxRate) / 100,
-      0,
-    ),
+    lineItems.reduce((sum, item) => {
+      const net = item.quantity * item.unitPrice - item.discountAmount;
+      return sum + (net * item.taxRate) / 100;
+    }, 0),
   );
-  const discountPercent = Math.min(
-    Math.max(number(formData.get('discount'), 0), 0),
-    100,
-  );
-  const discount = round2(((subtotal + taxAmount) * discountPercent) / 100);
-  const total = round2(subtotal + taxAmount - discount);
+  const discountPercent = Math.min(Math.max(number(formData.get('discount'), 0), 0), 100);
+  const discount = round2(((subtotal - itemDiscount + taxAmount) * discountPercent) / 100);
+  const total = round2(subtotal - itemDiscount + taxAmount - discount);
 
   const paymentUrl = parsePaymentUrl(formData.get('paymentUrl'));
   if (paymentUrl === undefined) {
     return { error: 'Enter a valid payment link (https://...)' };
   }
+  const paymentInstructions = text(formData.get('paymentInstructions')) || null;
+  const paymentLabel = text(formData.get('paymentLabel')) || null;
+  const saveDefaults = formData.get('saveDefaults') === 'on';
 
   const clerkUser = await currentUser();
   const email =
@@ -153,30 +163,52 @@ export async function createInvoice(
 
     const fromName = text(formData.get('fromName'));
     const fromEmail = text(formData.get('fromEmail'));
+    const fromPhone = text(formData.get('fromPhone'));
+    const fromTaxId = text(formData.get('fromTaxId'));
+    const fromWebsite = text(formData.get('fromWebsite'));
     const fromAddress = text(formData.get('fromAddress'));
+    const fromAddressLine2 = text(formData.get('fromAddressLine2'));
+    const invoiceNotes = text(formData.get('notes')) || null;
+    const invoiceTerms = text(formData.get('terms')) || null;
 
     let business = await prisma.business.findUnique({
       where: { userId: dbUser.id },
     });
     if (fromName) {
+      const businessData = {
+        name: fromName,
+        email: fromEmail || null,
+        phone: fromPhone || null,
+        taxId: fromTaxId || null,
+        website: fromWebsite || null,
+        addressLine1: fromAddress || null,
+        addressLine2: fromAddressLine2 || null,
+        ...(saveDefaults
+          ? {
+              defaultNotes: invoiceNotes,
+              defaultTerms: invoiceTerms,
+            }
+          : {}),
+      };
       business = await prisma.business.upsert({
         where: { userId: dbUser.id },
-        update: {
-          name: fromName,
-          email: fromEmail || null,
-          addressLine1: fromAddress || null,
-        },
+        update: businessData,
         create: {
           userId: dbUser.id,
-          name: fromName,
-          email: fromEmail || null,
-          addressLine1: fromAddress || null,
+          ...businessData,
         },
+      });
+    } else if (saveDefaults && business) {
+      business = await prisma.business.update({
+        where: { id: business.id },
+        data: { defaultNotes: invoiceNotes, defaultTerms: invoiceTerms },
       });
     }
 
     const clientCompany = text(formData.get('clientCompany'));
     const clientEmail = text(formData.get('clientEmail'));
+    const clientPhone = text(formData.get('clientPhone'));
+    const clientTaxId = text(formData.get('clientTaxId'));
     const clientAddress = text(formData.get('clientAddress'));
 
     const client = await prisma.client.create({
@@ -185,6 +217,8 @@ export async function createInvoice(
         name: clientName,
         company: clientCompany || null,
         email: clientEmail || null,
+        phone: clientPhone || null,
+        taxId: clientTaxId || null,
         addressLine1: clientAddress || null,
       },
     });
@@ -217,34 +251,45 @@ export async function createInvoice(
         total,
         amountPaid: 0,
         balanceDue: total,
-        notes: text(formData.get('notes')) || null,
-        terms: text(formData.get('terms')) || null,
+        notes: invoiceNotes,
+        terms: invoiceTerms,
         paymentUrl,
-        fromSnapshot: business
-          ? {
-              name: business.name,
-              email: business.email,
-              addressLine1: business.addressLine1,
-            }
-          : { name: fromName, email: fromEmail, addressLine1: fromAddress },
+        paymentInstructions,
+        paymentLabel,
+        fromSnapshot: {
+          name: fromName || business?.name || '',
+          email: fromEmail || business?.email || '',
+          phone: fromPhone || business?.phone || '',
+          taxId: fromTaxId || business?.taxId || '',
+          website: fromWebsite || business?.website || '',
+          addressLine1: fromAddress || business?.addressLine1 || '',
+          addressLine2: fromAddressLine2 || business?.addressLine2 || '',
+        },
         toSnapshot: {
           name: clientName,
           company: clientCompany,
           email: clientEmail,
+          phone: clientPhone,
+          taxId: clientTaxId,
           addressLine1: clientAddress,
         },
         items: {
-          create: lineItems.map((item, index) => ({
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            taxRate: item.taxRate,
-            taxAmount: round2(
-              (item.quantity * item.unitPrice * item.taxRate) / 100,
-            ),
-            amount: round2(item.quantity * item.unitPrice),
-            position: index,
-          })),
+          create: lineItems.map((item, index) => {
+            const base = item.quantity * item.unitPrice;
+            const net = base - item.discountAmount;
+            return {
+              description: item.description,
+              unit: item.unit || null,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              discountAmount: round2(item.discountAmount),
+              taxRate: item.taxRate,
+              taxName: item.taxName || null,
+              taxAmount: round2((net * item.taxRate) / 100),
+              amount: round2(base),
+              position: index,
+            };
+          }),
         },
         activities: {
           create: { type: 'CREATED', message: 'Invoice created' },
