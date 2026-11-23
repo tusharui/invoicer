@@ -13,9 +13,11 @@ enum InvoiceStatus {
   DRAFT
   SENT
   VIEWED
+  PARTIALLY_PAID
   OVERDUE
   PAID
   VOID
+  SUPERSEDED
 }
 
 enum PaymentMethod {
@@ -30,16 +32,26 @@ enum PaymentMethod {
   OTHER
 }
 
+enum PaymentRecordStatus {
+  RECORDED
+  VOIDED
+}
+
 enum InvoiceActivityType {
   CREATED
   UPDATED
   SENT
   VIEWED
   PAYMENT_RECEIVED
+  PAYMENT_VOIDED
   MARKED_PAID
+  MARKED_PARTIALLY_PAID
   MARKED_OVERDUE
   VOIDED
+  SUPERSEDED
+  CORRECTION_ISSUED
   REMINDER_SENT
+  PAYMENT_LINK_UPDATED
 }
 
 
@@ -161,14 +173,27 @@ model Invoice {
   notes               String?
   terms               String?
   paymentInstructions String?
+  paymentUrl          String?
+  paymentLabel        String?
   pdfUrl              String?
 
   fromSnapshot Json?
   toSnapshot   Json?
 
-  sentAt  DateTime?
-  viewedAt DateTime?
-  paidAt  DateTime?
+  sentAt    DateTime?
+  viewedAt  DateTime?
+  paidAt    DateTime?
+  lockedAt  DateTime?
+
+  version               Int       @default(1)
+  parentInvoiceId       String?
+  parentInvoice         Invoice?  @relation("InvoiceCorrections", fields: [parentInvoiceId], references: [id], onDelete: SetNull)
+  corrections           Invoice[] @relation("InvoiceCorrections")
+  supersededByInvoiceId String?   @unique
+  supersededByInvoice   Invoice?  @relation("InvoiceSupersession", fields: [supersededByInvoiceId], references: [id], onDelete: SetNull)
+  supersededInvoice     Invoice?  @relation("InvoiceSupersession")
+  supersededAt          DateTime?
+  correctionReason      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -176,6 +201,7 @@ model Invoice {
   items      InvoiceItem[]
   payments   Payment[]
   activities InvoiceActivity[]
+  revisions  InvoiceRevision[]
 
   @@unique([userId, number])
   @@index([userId, status])
@@ -183,6 +209,7 @@ model Invoice {
   @@index([userId, dueDate])
   @@index([userId, createdAt])
   @@index([clientId])
+  @@index([parentInvoiceId])
   @@map("invoices")
 }
 
@@ -209,18 +236,26 @@ model InvoiceItem {
 }
 
 model Payment {
-  id        String        @id @default(cuid())
+  id        String              @id @default(cuid())
   invoiceId String
-  invoice   Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoice   Invoice             @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
-  amount    Decimal       @db.Decimal(12, 2)
-  method    PaymentMethod @default(OTHER)
-  paidAt    DateTime      @default(now())
-  reference String? 
+  amount    Decimal             @db.Decimal(12, 2)
+  method    PaymentMethod       @default(OTHER)
+  status    PaymentRecordStatus @default(RECORDED)
+  paidAt    DateTime            @default(now())
+  reference String?
   note      String?
-  createdAt DateTime      @default(now())
+
+  recordedByUserId String?
+  voidedAt         DateTime?
+  voidReason       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([invoiceId])
+  @@index([invoiceId, status])
   @@map("payments")
 }
 
@@ -236,4 +271,21 @@ model InvoiceActivity {
 
   @@index([invoiceId, createdAt])
   @@map("invoice_activities")
+}
+
+model InvoiceRevision {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  version     Int
+  action      String
+  reason      String?
+  snapshot    Json
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId, createdAt])
+  @@index([invoiceId, version])
+  @@map("invoice_revisions")
 }
