@@ -93,7 +93,7 @@ export function RecordPaymentForm({
             id="reference"
             name="reference"
             className={inputClass}
-            placeholder="Transaction ID, check no"
+            placeholder="Transaction ID check number"
           />
         </div>
       </div>

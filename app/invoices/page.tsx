@@ -65,8 +65,8 @@ export default async function InvoicesPage() {
           </Link>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
-          <table className="w-full text-left text-base">
+        <div className="overflow-x-auto rounded-2xl border border-black/10 dark:border-white/10">
+          <table className="w-full min-w-[640px] text-left text-base">
             <thead className="bg-black font-mono text-xs tracking-wide text-white dark:bg-white dark:text-black">
               <tr>
                 <th className="px-5 py-3 font-semibold">Number</th>

@@ -76,7 +76,7 @@ export async function recordPayment(
   const { dbUser, invoice } = owned;
 
   if (["DRAFT", "VOID", "SUPERSEDED"].includes(invoice.status)) {
-    return { error: "Payments can only be recorded for sent/active invoices" };
+    return { error: "Payments can only be recorded for sent or active invoices" };
   }
 
   const amount = parseAmount(formData.get("amount"));
@@ -115,7 +115,7 @@ export async function recordPayment(
 
   if (amount > currentBilling.balanceDue) {
     return {
-      error: `Amount exceeds balance due (${currentBilling.balanceDue.toFixed(2)})`,
+      error: `Amount exceeds balance due ${currentBilling.balanceDue.toFixed(2)}`,
     };
   }
 
@@ -163,7 +163,7 @@ export async function recordPayment(
         data: {
           invoiceId: invoice.id,
           type: "PAYMENT_RECEIVED",
-          message: `Payment of ${amount.toFixed(2)} recorded via ${method.replace(/_/g, " ")}.`,
+          message: `Payment of ${amount.toFixed(2)} recorded via ${method.replace(/_/g, " ")}`,
           metadata: {
             amount,
             method,
@@ -199,7 +199,7 @@ export async function recordPayment(
     return { success: "Payment recorded" };
   } catch (error) {
     console.error("Failed to record payment", error);
-    return { error: "Could not record payment. Please try again" };
+    return { error: "Could not record payment Please try again" };
   }
 }
 
@@ -280,7 +280,7 @@ export async function voidPayment(
     return { success: "Payment voided" };
   } catch (error) {
     console.error("Failed to void payment", error);
-    return { error: "Could not void payment. Please try again" };
+    return { error: "Could not void payment Please try again" };
   }
 }
 
@@ -305,11 +305,11 @@ export async function updatePaymentUrl(
     try {
       const url = new URL(raw);
       if (url.protocol !== "https:" && url.protocol !== "http:") {
-        return { error: "Enter a valid payment link (https://...)" };
+        return { error: "Enter a valid payment link https" };
       }
       paymentUrl = url.toString();
     } catch {
-      return { error: "Enter a valid payment link (https://...)" };
+      return { error: "Enter a valid payment link https" };
     }
   }
 
@@ -332,6 +332,6 @@ export async function updatePaymentUrl(
     return { success: paymentUrl ? "Payment link updated" : "Payment link removed" };
   } catch (error) {
     console.error("Failed to update payment link", error);
-    return { error: "Could not update payment link. Please try again" };
+    return { error: "Could not update payment link Please try again" };
   }
 }

@@ -181,7 +181,7 @@ export function CreateInvoiceForm({
     setDemoError(null);
 
     if (demoGenerated) {
-      setDemoError("You've already used your free demo invoice. Sign up to create more");
+      setDemoError("You have already used your free demo invoice Sign up to create more");
       return;
     }
 
@@ -275,7 +275,7 @@ export function CreateInvoiceForm({
       setDemoGenerated(true);
     } catch (err) {
       setDemoError(
-        err instanceof Error ? err.message : "Could not download the invoice. Please try again",
+        err instanceof Error ? err.message : "Could not download the invoice Please try again",
       );
     } finally {
       setDemoBusy(false);
@@ -320,7 +320,7 @@ export function CreateInvoiceForm({
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="fromAddress">Address</label>
-                  <input id="fromAddress" name="fromAddress" className={inputClass} placeholder="Street, city, country" />
+                  <input id="fromAddress" name="fromAddress" className={inputClass} placeholder="Street city country" />
                 </div>
                 <button
                   type="button"
@@ -333,21 +333,21 @@ export function CreateInvoiceForm({
                   <div className="space-y-3 rounded-xl border border-black/5 p-3 dark:border-white/10">
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div>
-                        <label className={labelClass} htmlFor="fromPhone">Phone (optional)</label>
+                        <label className={labelClass} htmlFor="fromPhone">Phone</label>
                         <input id="fromPhone" name="fromPhone" className={inputClass} placeholder="+1 555 000 0000" />
                       </div>
                       <div>
-                        <label className={labelClass} htmlFor="fromTaxId">Tax ID (optional)</label>
+                        <label className={labelClass} htmlFor="fromTaxId">Tax ID</label>
                         <input id="fromTaxId" name="fromTaxId" className={inputClass} placeholder="GST / VAT / Tax ID" />
                       </div>
                     </div>
                     <div>
-                      <label className={labelClass} htmlFor="fromWebsite">Website (optional)</label>
+                      <label className={labelClass} htmlFor="fromWebsite">Website</label>
                       <input id="fromWebsite" name="fromWebsite" className={inputClass} placeholder="https://acme.com" />
                     </div>
                     <div>
-                      <label className={labelClass} htmlFor="fromAddressLine2">Address line 2 (optional)</label>
-                      <input id="fromAddressLine2" name="fromAddressLine2" className={inputClass} placeholder="State, postal code, country" />
+                      <label className={labelClass} htmlFor="fromAddressLine2">Address line 2</label>
+                      <input id="fromAddressLine2" name="fromAddressLine2" className={inputClass} placeholder="State postal code country" />
                     </div>
                   </div>
                 )}
@@ -388,7 +388,7 @@ export function CreateInvoiceForm({
               <div className="space-y-3">
                 {savedClients.length > 0 && (
                   <div>
-                    <label className={labelClass} htmlFor="savedClient">Saved client (optional)</label>
+                    <label className={labelClass} htmlFor="savedClient">Saved client</label>
                     <select
                       id="savedClient"
                       className={inputClass}
@@ -418,7 +418,7 @@ export function CreateInvoiceForm({
                     </div>
                     <div>
                       <label className={labelClass} htmlFor="clientAddress">Address</label>
-                      <textarea id="clientAddress" name="clientAddress" rows={2} className={inputClass} placeholder="Street, city, country" />
+                      <textarea id="clientAddress" name="clientAddress" rows={2} className={inputClass} placeholder="Street city country" />
                     </div>
                   </>
                 ) : (
@@ -437,7 +437,7 @@ export function CreateInvoiceForm({
                     </div>
                     <div>
                       <label className={labelClass} htmlFor="clientAddress">Address</label>
-                      <textarea id="clientAddress" name="clientAddress" rows={2} className={inputClass} placeholder="Street, city, country" />
+                      <textarea id="clientAddress" name="clientAddress" rows={2} className={inputClass} placeholder="Street city country" />
                     </div>
                   </>
                 )}
@@ -452,11 +452,11 @@ export function CreateInvoiceForm({
                   <div className="space-y-3 rounded-xl border border-black/5 p-3 dark:border-white/10">
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div>
-                        <label className={labelClass} htmlFor="clientPhone">Phone (optional)</label>
+                        <label className={labelClass} htmlFor="clientPhone">Phone</label>
                         <input id="clientPhone" name="clientPhone" className={inputClass} placeholder="+1 555 000 0000" />
                       </div>
                       <div>
-                        <label className={labelClass} htmlFor="clientTaxId">Tax ID (optional)</label>
+                        <label className={labelClass} htmlFor="clientTaxId">Tax ID</label>
                         <input id="clientTaxId" name="clientTaxId" className={inputClass} placeholder="GST / VAT / Tax ID" />
                       </div>
                     </div>
@@ -546,7 +546,7 @@ export function CreateInvoiceForm({
                 </select>
               </div>
               <div>
-                <label className={labelClass} htmlFor="discount">Global discount (%)</label>
+                <label className={labelClass} htmlFor="discount">Global discount</label>
                 <input id="discount" name="discount" type="number" min="0" max="100" step="0.01" placeholder="0" value={discount} onChange={(event) => setDiscount(event.target.value)} className={inputClass} />
               </div>
               <div>
@@ -554,33 +554,33 @@ export function CreateInvoiceForm({
                 <input id="paymentLabel" name="paymentLabel" className={inputClass} placeholder="Pay now" />
               </div>
               <div className="sm:col-span-2">
-                <label className={labelClass} htmlFor="paymentUrl">Payment link (optional)</label>
+                <label className={labelClass} htmlFor="paymentUrl">Payment link</label>
                 <input id="paymentUrl" name="paymentUrl" type="url" className={inputClass} placeholder="https://pay.example.com/your-link" />
               </div>
               <div className="sm:col-span-2 xl:col-span-4">
                 <label className={labelClass} htmlFor="paymentInstructions">Payment instructions</label>
-                <textarea id="paymentInstructions" name="paymentInstructions" rows={2} className={inputClass} placeholder="Bank transfer, UPI, check details, or other payment instructions" />
+                <textarea id="paymentInstructions" name="paymentInstructions" rows={2} className={inputClass} placeholder="Bank transfer UPI check details or other payment instructions" />
               </div>
               <div>
-                <label className={labelClass} htmlFor="referenceNumber">PO / Reference (optional)</label>
+                <label className={labelClass} htmlFor="referenceNumber">PO or Reference</label>
                 <input id="referenceNumber" name="referenceNumber" className={inputClass} placeholder="PO-12345" />
               </div>
               <div>
-                <label className={labelClass} htmlFor="shippingAmount">Shipping / fees (optional)</label>
+                <label className={labelClass} htmlFor="shippingAmount">Shipping and fees</label>
                 <input id="shippingAmount" name="shippingAmount" type="number" min="0" step="0.01" value={shippingAmount} onChange={(e) => setShippingAmount(e.target.value)} className={inputClass} placeholder="0" />
               </div>
               <div>
-                <label className={labelClass} htmlFor="depositAmount">Deposit due (optional)</label>
+                <label className={labelClass} htmlFor="depositAmount">Deposit due</label>
                 <input id="depositAmount" name="depositAmount" type="number" min="0" step="0.01" className={inputClass} placeholder="0" />
               </div>
               <div>
-                <label className={labelClass} htmlFor="taxLabel">Tax label (optional)</label>
+                <label className={labelClass} htmlFor="taxLabel">Tax label</label>
                 <input id="taxLabel" name="taxLabel" className={inputClass} placeholder="GST / VAT / Sales tax" />
               </div>
               <div className="sm:col-span-2 xl:col-span-4 rounded-xl border border-black/5 p-3 dark:border-white/10">
                 <label className="flex items-center gap-2 text-sm font-medium text-black dark:text-white">
                   <input type="checkbox" name="isRecurring" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="size-4 rounded border-black/20" />
-                  Recurring invoice (optional)
+                  Recurring invoice
                 </label>
                 {isRecurring && (
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -594,7 +594,7 @@ export function CreateInvoiceForm({
                       </select>
                     </div>
                     <div>
-                      <label className={labelClass} htmlFor="recurrenceEndsAt">Ends on (optional)</label>
+                      <label className={labelClass} htmlFor="recurrenceEndsAt">Ends on</label>
                       <input id="recurrenceEndsAt" name="recurrenceEndsAt" type="date" className={inputClass} />
                     </div>
                   </div>
@@ -640,7 +640,7 @@ export function CreateInvoiceForm({
                       <input required value={item.description} onChange={(event) => updateItem(item.id, { description: event.target.value })} className={inputClass} placeholder="Web design services" />
                     </div>
                     <div>
-                      <label className={labelClass}>Qty</label>
+                      <label className={labelClass}>Quantity</label>
                       <input type="number" min="0" step="0.01" value={item.quantity} onChange={(event) => updateItem(item.id, { quantity: event.target.value })} className={inputClass} />
                     </div>
                     <div>
@@ -654,15 +654,15 @@ export function CreateInvoiceForm({
                   </div>
                   <div className="mt-3 grid gap-3 sm:grid-cols-3">
                     <div>
-                      <label className={labelClass}>Unit (optional)</label>
+                      <label className={labelClass}>Unit</label>
                       <input value={item.unit} onChange={(event) => updateItem(item.id, { unit: event.target.value })} className={inputClass} placeholder="hrs / pcs / service" />
                     </div>
                     <div>
-                      <label className={labelClass}>Item discount (optional)</label>
+                      <label className={labelClass}>Item discount</label>
                       <input type="number" min="0" step="0.01" value={item.discount} onChange={(event) => updateItem(item.id, { discount: event.target.value })} className={inputClass} placeholder="0" />
                     </div>
                     <div>
-                      <label className={labelClass}>Tax name (optional)</label>
+                      <label className={labelClass}>Tax name</label>
                       <input value={item.taxName} onChange={(event) => updateItem(item.id, { taxName: event.target.value })} className={inputClass} placeholder="GST / VAT" />
                     </div>
                   </div>
@@ -673,7 +673,7 @@ export function CreateInvoiceForm({
 
           <div className="grid gap-4 md:grid-cols-2">
             <section className={sectionClass}>
-              <h2 className={headingClass + " mb-3"}>Notes (customer visible)</h2>
+              <h2 className={headingClass + " mb-3"}>Notes</h2>
               <textarea name="notes" rows={3} className={inputClass} placeholder="Thank you for your business" />
             </section>
             <section className={sectionClass}>
@@ -682,7 +682,7 @@ export function CreateInvoiceForm({
             </section>
           </div>
           <section className={sectionClass}>
-            <h2 className={headingClass + " mb-3"}>Internal note (optional)</h2>
+            <h2 className={headingClass + " mb-3"}>Internal note</h2>
             <textarea name="internalNote" rows={2} className={inputClass} placeholder="Private note for your team only" />
           </section>
         </div>
@@ -707,7 +707,7 @@ export function CreateInvoiceForm({
               )}
               {totals.shipping > 0 && (
                 <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
-                  <dt>Shipping / fees</dt>
+                  <dt>Shipping and fees</dt>
                   <dd className="font-medium text-black dark:text-white">{money(totals.shipping, currency)}</dd>
                 </div>
               )}
@@ -761,7 +761,7 @@ export function CreateInvoiceForm({
           {mode === "demo" && demoGenerated && (
             <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4 dark:border-white/10 dark:bg-white/5">
               <p className="text-base font-semibold text-black dark:text-white">Demo ready</p>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Create a free account to save, send, and track invoices</p>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Create a free account to save send and track invoices</p>
               <div className="mt-3">
                 <SignUpButton mode="modal" forceRedirectUrl={CREATE_INVOICE_PATH}>
                   <button type="button" className="inline-flex h-10 w-full items-center justify-center rounded-full bg-black px-5 text-sm font-semibold text-white transition-opacity hover:opacity-80 dark:bg-white dark:text-black">

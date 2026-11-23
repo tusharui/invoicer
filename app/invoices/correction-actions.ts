@@ -47,7 +47,7 @@ export async function issueCorrection(
   if (hasRecordedPayments) {
     return {
       error:
-        "Invoices with recorded payments cannot be auto-replaced. Void/reconcile payments manually before issuing a correction",
+        "Invoices with recorded payments cannot be auto replaced Void or reconcile payments manually before issuing a correction",
     };
   }
 
@@ -131,7 +131,7 @@ export async function issueCorrection(
           activities: {
             create: {
               type: "CREATED",
-              message: `Correction draft created from ${fresh.number}.`,
+              message: `Correction draft created from ${fresh.number}`,
               metadata: { parentInvoiceId: fresh.id, reason },
             },
           },
@@ -160,7 +160,7 @@ export async function issueCorrection(
         data: {
           invoiceId: fresh.id,
           type: "CORRECTION_ISSUED",
-          message: `Correction issued: ${reason}`,
+          message: `Correction issued ${reason}`,
           metadata: { replacementInvoiceId: replacement.id, reason },
         },
       });
@@ -169,7 +169,7 @@ export async function issueCorrection(
     });
   } catch (error) {
     console.error("Failed to issue correction", error);
-    return { error: "Could not issue correction. Please try again" };
+    return { error: "Could not issue correction Please try again" };
   }
 
   revalidatePath("/invoices");

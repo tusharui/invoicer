@@ -5,19 +5,19 @@ const steps = [
     number: "01",
     title: "Add your details",
     description:
-      "Enter your business and client details, invoice number, and dates. Notes and terms go here too",
+      "Enter your business and client details invoice number and dates Notes and terms go here too",
   },
   {
     number: "02",
-    title: "Build & download",
+    title: "Build and download",
     description:
-      "Add line items with quantity, rate and tax. Watch the total update live, then download your invoice instantly",
+      "Add line items with quantity rate and tax Watch the total update live then download your invoice instantly",
   },
   {
     number: "03",
-    title: "Save & track",
+    title: "Save and track",
     description:
-      "Create a free account to save invoices, send them by email, and keep everything organized in one place",
+      "Create a free account to save invoices send them by email and keep everything organized in one place",
   },
 ];
 

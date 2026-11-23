@@ -25,7 +25,7 @@ export type InvoicePreviewData = {
 };
 
 export const DEFAULT_PREVIEW: InvoicePreviewData = {
-  number: "#INV-0007",
+  number: "INV-0007",
   status: "Paid",
   fromName: "Northline Studio",
   fromEmail: "hello@northline.studio",
@@ -34,12 +34,12 @@ export const DEFAULT_PREVIEW: InvoicePreviewData = {
   issued: "Nov 12, 2026",
   due: "Nov 26, 2026",
   items: [
-    { description: "Brand identity & logo", qty: "1", amount: "$1,200.00" },
+    { description: "Brand identity and logo", qty: "1", amount: "$1,200.00" },
     { description: "Landing page design", qty: "1", amount: "$850.00" },
     { description: "Social media kit", qty: "2", amount: "$300.00" },
   ],
   subtotal: "$2,350.00",
-  taxLabel: "Tax (10%)",
+  taxLabel: "Tax 10%",
   tax: "$235.00",
   total: "$2,585.00",
 };
@@ -129,7 +129,8 @@ export function InvoicePreview({
           </div>
 
           {/* line items */}
-          <table className="mt-4 w-full text-left text-base">
+          <div className="overflow-x-auto">
+            <table className="mt-4 w-full min-w-[320px] text-left text-base">
             <thead>
               <tr className="text-base tracking-wide text-black dark:text-white">
                 <th className="pb-2 font-medium">Description</th>
@@ -152,7 +153,8 @@ export function InvoicePreview({
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
 
           {/* totals */}
           <div className="ml-auto mt-5 w-full max-w-[210px] space-y-2 text-base text-black dark:text-white">

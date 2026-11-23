@@ -8,22 +8,22 @@ const faqs = [
   {
     question: "Is it free",
     answer:
-      "Yes. Create, download and email invoices for free. There's no credit card and no trial period",
+      "Yes create download and email invoices for free There is no credit card and no trial period",
   },
   {
     question: "Is my data safe",
     answer:
-      "Every invoice belongs to your signed-in account and is protected by Clerk authentication. Only you can see your invoices",
+      "Every invoice belongs to your signed in account and is protected by Clerk authentication Only you can see your invoices",
   },
   {
     question: "Can I customize invoices",
     answer:
-      "Yes — your business details, client details, line items, tax, discount, currency, notes and terms are all editable",
+      "Yes your business details client details line items tax discount currency notes and terms are all editable",
   },
   {
     question: "How do I send an invoice",
     answer:
-      "Open any saved invoice and choose Email as PDF, or download a PNG and share it yourself",
+      "Open any saved invoice and choose Email as PDF or download a PNG and share it yourself",
   },
 ];
 

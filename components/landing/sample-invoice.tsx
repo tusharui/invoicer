@@ -11,7 +11,7 @@ const samples: { label: string; data: InvoicePreviewData }[] = [
   {
     label: "Design project",
     data: {
-      number: "#INV-0007",
+      number: "INV-0007",
       status: "Paid",
       fromName: "Northline Studio",
       fromEmail: "hello@northline.studio",
@@ -20,12 +20,12 @@ const samples: { label: string; data: InvoicePreviewData }[] = [
       issued: "Nov 12, 2026",
       due: "Nov 26, 2026",
       items: [
-        { description: "Brand identity & logo", qty: "1", amount: "$1,200.00" },
+        { description: "Brand identity and logo", qty: "1", amount: "$1,200.00" },
         { description: "Landing page design", qty: "1", amount: "$850.00" },
         { description: "Social media kit", qty: "2", amount: "$300.00" },
       ],
       subtotal: "$2,350.00",
-      taxLabel: "Tax (10%)",
+      taxLabel: "Tax 10%",
       tax: "$235.00",
       total: "$2,585.00",
     },
@@ -33,7 +33,7 @@ const samples: { label: string; data: InvoicePreviewData }[] = [
   {
     label: "Consulting",
     data: {
-      number: "#INV-0012",
+      number: "INV-0012",
       status: "Sent",
       fromName: "Northline Studio",
       fromEmail: "hello@northline.studio",
@@ -46,7 +46,7 @@ const samples: { label: string; data: InvoicePreviewData }[] = [
         { description: "Implementation plan", qty: "1", amount: "$650.00" },
       ],
       subtotal: "$1,550.00",
-      taxLabel: "Tax (8%)",
+      taxLabel: "Tax 8%",
       tax: "$124.00",
       total: "$1,674.00",
     },
@@ -54,7 +54,7 @@ const samples: { label: string; data: InvoicePreviewData }[] = [
   {
     label: "Monthly retainer",
     data: {
-      number: "#INV-0013",
+      number: "INV-0013",
       status: "Draft",
       fromName: "Northline Studio",
       fromEmail: "hello@northline.studio",
@@ -67,7 +67,7 @@ const samples: { label: string; data: InvoicePreviewData }[] = [
         { description: "Reporting", qty: "1", amount: "$250.00" },
       ],
       subtotal: "$1,000.00",
-      taxLabel: "Tax (0%)",
+      taxLabel: "Tax 0%",
       tax: "$0.00",
       total: "$1,000.00",
     },
@@ -86,7 +86,7 @@ export function SampleInvoice() {
         <SectionHeading
           eyebrow=""
           title="See exactly what your clients will get"
-          titleClassName="whitespace-nowrap text-4xl sm:text-5xl md:text-6xl"
+          titleClassName="text-xl sm:text-3xl md:text-5xl lg:text-6xl sm:whitespace-nowrap"
           center
         />
 

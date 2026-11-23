@@ -8,7 +8,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Invoicer — Invoicing made simple',
-  description: 'Create, send, and track beautiful invoices in seconds',
+  description: 'Create send and track beautiful invoices in seconds',
 }
 
 export default function RootLayout({

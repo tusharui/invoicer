@@ -79,7 +79,7 @@ export function buildInvoiceSvg(props: InvoiceDownloadData): { svg: string; heig
     const lines = [
       [party.company, party.email].filter(Boolean).join(" · "),
       [party.phone, (party as InvoiceDownloadData["from"]).website].filter(Boolean).join(" · "),
-      party.taxId ? `Tax ID: ${party.taxId}` : "",
+      party.taxId ? `Tax ID ${party.taxId}` : "",
       party.addressLine1,
       (party as InvoiceDownloadData["from"]).addressLine2 || "",
     ].filter(Boolean);
@@ -169,7 +169,7 @@ export function buildInvoiceSvg(props: InvoiceDownloadData): { svg: string; heig
     <rect width="${width}" height="${height}" fill="#ffffff" />
     <text x="${margin}" y="70" font-family="Inter, sans-serif" font-size="24" font-weight="bold" letter-spacing="2" fill="#000000">INVOICE</text>
     <text x="${margin}" y="104" font-family="Inter, sans-serif" font-size="16" font-weight="bold" fill="#000000">${esc(props.number)}</text>
-    <text x="${margin}" y="160" font-family="Inter, sans-serif" font-size="16" fill="#000000">Issued ${esc(props.issueDate)}   ·   Due ${esc(props.dueDate)}${props.referenceNumber ? `   ·   Ref ${esc(props.referenceNumber)}` : ""}</text>
+    <text x="${margin}" y="160" font-family="Inter, sans-serif" font-size="16" fill="#000000">Issued ${esc(props.issueDate)}    Due ${esc(props.dueDate)}${props.referenceNumber ? `    Ref ${esc(props.referenceNumber)}` : ""}</text>
     <line x1="${margin}" y1="182" x2="${right}" y2="182" stroke="#000000" stroke-width="1" />
     ${partyBlock(props.from, margin, "BILL FROM")}
     ${partyBlock(props.to, 430, "BILL TO")}
@@ -188,7 +188,7 @@ export function buildInvoiceSvg(props: InvoiceDownloadData): { svg: string; heig
       rows.push(totalRow("Subtotal", props.subtotal, y)); y += 30;
       rows.push(totalRow(props.taxLabel ? `${props.taxLabel} amount` : "Tax amount", props.taxAmount, y)); y += 30;
       rows.push(totalRow("Discount", `-${props.discountAmount}`, y)); y += 30;
-      if (Number(props.shippingAmount ?? 0) > 0) { rows.push(totalRow("Shipping / fees", String(props.shippingAmount), y)); y += 30; }
+      if (Number(props.shippingAmount ?? 0) > 0) { rows.push(totalRow("Shipping and fees", String(props.shippingAmount), y)); y += 30; }
       rows.push(totalRow("Total", `${props.currency} ${props.total}`, y, true)); y += 40;
       if (Number(props.depositAmount ?? 0) > 0) { rows.push(totalRow("Deposit due", `${props.currency} ${props.depositAmount}`, y)); y += 30; }
       return rows.join("");
@@ -232,7 +232,7 @@ export async function downloadInvoicePng(props: InvoiceDownloadData): Promise<vo
 
         canvas.toBlob((blob) => {
           if (!blob) {
-            reject(new Error("Could not create the image. Please try again"));
+            reject(new Error("Could not create the image Please try again"));
             return;
           }
           const url = URL.createObjectURL(blob);
@@ -246,7 +246,7 @@ export async function downloadInvoicePng(props: InvoiceDownloadData): Promise<vo
           resolve();
         }, "image/png");
       } catch (error) {
-        reject(error instanceof Error ? error : new Error("Could not save the image. Please try again"));
+        reject(error instanceof Error ? error : new Error("Could not save the image Please try again"));
       } finally {
         URL.revokeObjectURL(svgUrl);
       }
@@ -254,7 +254,7 @@ export async function downloadInvoicePng(props: InvoiceDownloadData): Promise<vo
 
     image.onerror = () => {
       URL.revokeObjectURL(svgUrl);
-      reject(new Error("Could not render the invoice. Please try again"));
+      reject(new Error("Could not render the invoice Please try again"));
     };
 
     image.src = svgUrl;
@@ -271,7 +271,7 @@ export function DownloadInvoiceButton(props: InvoiceDownloadData) {
     try {
       await downloadInvoicePng(props);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not prepare the invoice. Please try again");
+      setError(err instanceof Error ? err.message : "Could not prepare the invoice Please try again");
     } finally {
       setBusy(false);
     }

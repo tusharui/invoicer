@@ -72,8 +72,8 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
               return (
                 <div className="rounded-xl border border-black/10 bg-white px-4 py-3 text-base shadow-lg dark:border-white/10 dark:bg-zinc-950">
                   <p className="mb-1 font-medium text-black dark:text-white">{label}</p>
-                  <p className="text-zinc-600 dark:text-zinc-300">Invoiced: {formatMoney(invoiced)}</p>
-                  <p className="text-emerald-600 dark:text-emerald-400">Paid: {formatMoney(paid)}</p>
+                  <p className="text-zinc-600 dark:text-zinc-300">Invoiced {formatMoney(invoiced)}</p>
+                  <p className="text-emerald-600 dark:text-emerald-400">Paid {formatMoney(paid)}</p>
                 </div>
               );
             }}

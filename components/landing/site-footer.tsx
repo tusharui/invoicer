@@ -31,7 +31,7 @@ export function SiteFooter() {
       </div>
       <div className="mx-auto w-full max-w-6xl px-5 pb-8 sm:px-8">
         <p className="font-mono text-xs tracking-wide text-zinc-500">
-          © 2026 Invoicer
+          2026 Invoicer
         </p>
       </div>
     </footer>

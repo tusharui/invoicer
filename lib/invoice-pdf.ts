@@ -84,7 +84,7 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
 
     doc.font("Helvetica").fontSize(10).fillColor("#444444");
     doc.text(
-      `Issued ${data.issueDate}    |    Due ${data.dueDate}${data.referenceNumber ? `    |    Ref ${data.referenceNumber}` : ""}`,
+      `Issued ${data.issueDate}    Due ${data.dueDate}${data.referenceNumber ? `    Ref ${data.referenceNumber}` : ""}`,
       left,
       y,
     );
@@ -115,7 +115,7 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
       const lines = [
         [value.company, value.email].filter(Boolean).join(" | "),
         [value.phone, value.website].filter(Boolean).join(" | "),
-        value.taxId ? `Tax ID: ${value.taxId}` : "",
+        value.taxId ? `Tax ID ${value.taxId}` : "",
         value.addressLine1,
         value.addressLine2,
       ].filter(Boolean) as string[];
@@ -191,7 +191,7 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
       const discountAmt = Number(item.discountAmount ?? 0);
       if (discountAmt > 0) {
         doc.font("Helvetica").fontSize(8).fillColor("#666666");
-        doc.text(`Discount: -${amount(String(discountAmt))}`, col.description.x, y + descHeight + 2, {
+        doc.text(`Discount -${amount(String(discountAmt))}`, col.description.x, y + descHeight + 2, {
           width: col.description.width,
         });
         rowHeight = Math.max(rowHeight, descHeight + 16);
@@ -217,7 +217,7 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
     totalLine("Subtotal", amount(data.subtotal));
     totalLine(data.taxLabel ? `${data.taxLabel} amount` : "Tax amount", amount(data.taxAmount));
     totalLine("Discount", `-${amount(data.discountAmount)}`);
-    if (Number(data.shippingAmount ?? 0) > 0) totalLine("Shipping / fees", amount(String(data.shippingAmount)));
+    if (Number(data.shippingAmount ?? 0) > 0) totalLine("Shipping and fees", amount(String(data.shippingAmount)));
     totalLine("Total", `${data.currency} ${amount(data.total)}`, true);
     if (Number(data.depositAmount ?? 0) > 0) totalLine("Deposit due", `${data.currency} ${amount(String(data.depositAmount))}`);
 

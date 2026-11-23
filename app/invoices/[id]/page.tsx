@@ -213,7 +213,7 @@ export default async function InvoiceDetailPage({
           {[from.email, from.phone].filter(Boolean).map((v) => (
             <p key={v} className="mt-1 text-base text-zinc-600 dark:text-zinc-300">{v}</p>
           ))}
-          {[from.website, from.taxId ? `Tax ID: ${from.taxId}` : ""].filter(Boolean).map((v) => (
+          {[from.website, from.taxId ? `Tax ID ${from.taxId}` : ""].filter(Boolean).map((v) => (
             <p key={v} className="mt-1 text-base text-zinc-600 dark:text-zinc-300">{v}</p>
           ))}
           <p className="mt-1 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">
@@ -226,7 +226,7 @@ export default async function InvoiceDetailPage({
           {[to.company, to.email, to.phone].filter(Boolean).map((v) => (
             <p key={v} className="mt-1 text-base text-zinc-600 dark:text-zinc-300">{v}</p>
           ))}
-          {to.taxId && <p className="mt-1 text-base text-zinc-600 dark:text-zinc-300">Tax ID: {to.taxId}</p>}
+          {to.taxId && <p className="mt-1 text-base text-zinc-600 dark:text-zinc-300">Tax ID {to.taxId}</p>}
           <p className="mt-1 whitespace-pre-line text-base text-zinc-600 dark:text-zinc-300">{to.addressLine1}</p>
         </div>
       </div>
@@ -241,8 +241,8 @@ export default async function InvoiceDetailPage({
         />
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
-        <table className="w-full text-left text-base">
+      <div className="mt-8 overflow-x-auto rounded-2xl border border-black/10 dark:border-white/10">
+        <table className="w-full min-w-[640px] text-left text-base">
           <thead className="bg-black font-mono text-xs tracking-wide text-white dark:bg-white dark:text-black">
             <tr>
               <th className="px-5 py-3 font-semibold">Description</th>
@@ -262,7 +262,7 @@ export default async function InvoiceDetailPage({
                 <td className="px-5 py-4 text-black dark:text-white">
                   <div>{item.description}</div>
                   {Number(item.discountAmount) > 0 && (
-                    <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Discount: -{money(item.discountAmount)}</div>
+                    <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Discount -{money(item.discountAmount)}</div>
                   )}
                 </td>
                 <td className="px-5 py-4 text-right tabular-nums text-zinc-600 dark:text-zinc-300">
@@ -344,7 +344,7 @@ export default async function InvoiceDetailPage({
               {invoice.revisions.map((rev) => (
                 <li key={rev.id} className="px-5 py-4 text-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-medium text-black dark:text-white">REVISION v{rev.version} · {rev.action}</span>
+                    <span className="font-medium text-black dark:text-white">REVISION v{rev.version} {rev.action}</span>
                     <span className="text-zinc-500 dark:text-zinc-400">{formatDate(rev.createdAt)}</span>
                   </div>
                   {rev.reason && <p className="mt-1 text-zinc-600 dark:text-zinc-300">{rev.reason}</p>}

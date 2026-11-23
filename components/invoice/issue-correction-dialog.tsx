@@ -47,7 +47,7 @@ export function IssueCorrectionDialog({ invoiceId, disabled }: Props) {
               name="reason"
               required
               rows={3}
-              placeholder="Explain what needs to be corrected..."
+              placeholder="Explain what needs to be corrected"
               className="w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-black outline-none focus:border-black dark:border-white/15 dark:bg-black dark:text-white dark:focus:border-white"
             />
           </div>

@@ -108,7 +108,7 @@ export async function createInvoice(
         .filter((item) => item.description.length > 0);
     }
   } catch {
-    return { error: 'Line items could not be read. Please try again' };
+    return { error: 'Line items could not be read Please try again' };
   }
 
   if (lineItems.length === 0) {
@@ -117,7 +117,7 @@ export async function createInvoice(
 
   const paymentUrl = parsePaymentUrl(formData.get('paymentUrl'));
   if (paymentUrl === undefined) {
-    return { error: 'Enter a valid payment link (https://...)' };
+    return { error: 'Enter a valid payment link https' };
   }
   const paymentInstructions = text(formData.get('paymentInstructions')) || null;
   const paymentLabel = text(formData.get('paymentLabel')) || null;
@@ -242,7 +242,7 @@ export async function createInvoice(
       where: { userId_number: { userId: dbUser.id, number: invoiceNumber } },
     });
     if (duplicate) {
-      return { error: `Invoice number "${invoiceNumber}" is already in use` };
+      return { error: `Invoice number ${invoiceNumber} is already in use` };
     }
 
     const invoice = await prisma.invoice.create({
@@ -325,7 +325,7 @@ export async function createInvoice(
     invoiceId = invoice.id;
   } catch (error) {
     console.error('Failed to create invoice', error);
-    return { error: 'Could not create the invoice. Please try again' };
+    return { error: 'Could not create the invoice Please try again' };
   }
 
   redirect(`/invoices/${invoiceId}`);
@@ -470,18 +470,18 @@ export async function sendInvoice(
         <div style="font-family:Arial,sans-serif;color:#111;max-width:600px;margin:auto">
           <h1 style="font-size:24px;margin:0 0 8px">Invoice ${invoice.number}</h1>
           <p style="color:#555;font-size:14px;margin:0 0 24px">
-            Issued ${displayDate(invoice.issueDate)} · Due ${displayDate(invoice.dueDate)}
+            Issued ${displayDate(invoice.issueDate)} Due ${displayDate(invoice.dueDate)}
           </p>
           <p style="font-size:14px;line-height:1.6">
-            Hi ${to.name || 'there'},<br /><br />
-            Please find invoice <strong>${invoice.number}</strong> attached.
-            Balance due is <strong>${invoice.currency} ${balanceDue.toFixed(2)}</strong>,
-            payable by ${displayDate(invoice.dueDate)}.
+            Hi ${to.name || 'there'}<br /><br />
+            Please find invoice <strong>${invoice.number}</strong> attached
+            Balance due is <strong>${invoice.currency} ${balanceDue.toFixed(2)}</strong>
+            payable by ${displayDate(invoice.dueDate)}
           </p>
           ${payNowBlock}
           ${paymentInstructionsBlock}
           <p style="color:#555;font-size:13px;margin-top:32px">
-            Sent by ${from.name || 'Invoicer'}${from.email ? ` (${from.email})` : ''}.
+            Sent by ${from.name || 'Invoicer'}${from.email ? ` ${from.email}` : ''}
           </p>
         </div>
       `,
@@ -529,7 +529,7 @@ export async function sendInvoice(
         data: {
           invoiceId: invoice.id,
           type: isReminder ? "REMINDER_SENT" : "SENT",
-          message: isReminder ? `Reminder sent to ${recipient}.` : `Invoice sent to ${recipient}.`,
+          message: isReminder ? `Reminder sent to ${recipient}` : `Invoice sent to ${recipient}`,
           metadata: { recipient },
         },
       });
@@ -539,9 +539,9 @@ export async function sendInvoice(
     revalidatePath('/invoices');
     revalidatePath(`/invoices/${invoice.id}`);
 
-    return { success: isReminder ? `Reminder sent to ${recipient}.` : `Invoice sent to ${recipient}.` };
+    return { success: isReminder ? `Reminder sent to ${recipient}` : `Invoice sent to ${recipient}` };
   } catch (error) {
     console.error('Failed to send invoice', error);
-    return { error: 'Could not send the invoice. Please try again' };
+    return { error: 'Could not send the invoice Please try again' };
   }
 }

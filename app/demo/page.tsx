@@ -5,7 +5,7 @@ import { CreateInvoiceForm } from "@/components/invoice/create-invoice-form";
 import { monoLabelClass } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Try Invoice Demo — Invoicer",
+  title: "Try Invoice Demo Invoicer",
   description: "Create and download a sample invoice without signing up",
 };
 
@@ -27,8 +27,8 @@ export default async function DemoPage() {
             Try creating an invoice
           </h1>
           <p className="mt-2 max-w-2xl text-base text-zinc-600 dark:text-zinc-300">
-            Fill in the details and download a sample invoice — no sign-up needed.
-            Create a free account when you want to save, send, and track invoices
+            Fill in the details and download a sample invoice no sign up needed
+            Create a free account when you want to save send and track invoices
           </p>
         </div>
         <Link
@@ -40,7 +40,7 @@ export default async function DemoPage() {
       </div>
 
       <div className="mb-6 rounded-xl border border-black/10 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
-        This is a demo. Your invoice will be downloaded to your device and won&apos;t be saved to an account
+        This is a demo Your invoice will be downloaded to your device and will not be saved to an account
       </div>
 
       <CreateInvoiceForm

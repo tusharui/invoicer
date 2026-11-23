@@ -12,12 +12,12 @@ const features = [
   {
     icon: FileText,
     title: "Try it free",
-    description: "Create and download one invoice with no sign-up needed",
+    description: "Create and download one invoice with no sign up needed",
   },
   {
     icon: Calculator,
     title: "Live totals",
-    description: "Subtotal, tax, shipping and grand total update as you type",
+    description: "Subtotal tax shipping and grand total update as you type",
   },
   {
     icon: Link2,
@@ -26,19 +26,19 @@ const features = [
   },
   {
     icon: Wallet,
-    title: "Payments & reminders",
+    title: "Payments and reminders",
     description:
-      "Record payments, track partial payments and nudge clients who are late",
+      "Record payments track partial payments and nudge clients who are late",
   },
   {
     icon: Download,
-    title: "PNG & PDF",
+    title: "PNG and PDF",
     description: "Download an image or email a polished PDF to your client",
   },
   {
     icon: LockKeyhole,
     title: "Private workspace",
-    description: "Signed-in invoices stay yours and only yours",
+    description: "Signed in invoices stay yours and only yours",
   },
 ];
 
@@ -52,7 +52,7 @@ export function Features() {
         <SectionHeading
           eyebrow=""
           title="Everything you need to get paid"
-          titleClassName="whitespace-nowrap text-5xl sm:text-6xl md:text-7xl"
+          titleClassName="text-2xl sm:text-4xl md:text-5xl lg:text-6xl sm:whitespace-nowrap"
         />
 
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

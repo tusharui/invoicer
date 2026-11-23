@@ -226,7 +226,7 @@ export default async function DashboardPage() {
               <h2 className="text-2xl font-semibold tracking-tight text-black dark:text-white">Reminders</h2>
             </div>
             <p className="mt-1 text-base text-zinc-600 dark:text-zinc-300">
-              Overdue and due-soon invoices that may need a reminder
+              Overdue and due soon invoices that may need a reminder
             </p>
           </div>
           <span className="rounded-full bg-zinc-100 px-4 py-1.5 text-base font-medium text-zinc-700 dark:bg-white/10 dark:text-zinc-200">
@@ -236,7 +236,7 @@ export default async function DashboardPage() {
 
         {reminderCandidates.length === 0 ? (
           <div className="border-t border-black/10 px-6 py-12 text-center dark:border-white/10">
-            <p className="text-xl text-zinc-600 dark:text-zinc-300">No overdue or due-soon invoices need reminders right now</p>
+            <p className="text-xl text-zinc-600 dark:text-zinc-300">No overdue or due soon invoices need reminders right now</p>
           </div>
         ) : (
           <div className="divide-y divide-black/5 border-t border-black/10 dark:divide-white/5 dark:border-white/10">
@@ -261,9 +261,9 @@ export default async function DashboardPage() {
                     </div>
                     <p className="mt-2 text-base text-zinc-600 dark:text-zinc-300">
                       <span className="font-medium text-black dark:text-white">{invoice.client.name}</span>
-                      <span className="mx-2 text-zinc-400">·</span>
+                      <span className="mx-2 text-zinc-400"> </span>
                       Due {formatDate(dueDate)}
-                      <span className="mx-2 text-zinc-400">·</span>
+                      <span className="mx-2 text-zinc-400"> </span>
                       Balance <Money value={billing.balanceDue} currency={invoice.currency} className="inline font-medium" />
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-base text-zinc-500 dark:text-zinc-400">
@@ -274,13 +274,13 @@ export default async function DashboardPage() {
                       {invoice.activities.length > 0 && (
                         <details>
                           <summary className="cursor-pointer select-none text-base text-black underline-offset-4 hover:underline dark:text-white">
-                            Reminder history ({invoice.activities.length})
+                            Reminder history {invoice.activities.length}
                           </summary>
                           <ul className="mt-3 space-y-2 rounded-xl bg-zinc-50 p-4 dark:bg-white/5">
                             {invoice.activities.map((activity) => (
                               <li key={activity.id} className="text-base text-zinc-700 dark:text-zinc-200">
                                 <span className="font-medium">{formatDateTime(activity.createdAt)}</span>
-                                {activity.message ? <span className="text-zinc-500 dark:text-zinc-400"> · {activity.message}</span> : ""}
+                                {activity.message ? <span className="text-zinc-500 dark:text-zinc-400"> {activity.message}</span> : ""}
                               </li>
                             ))}
                           </ul>
@@ -331,7 +331,7 @@ export default async function DashboardPage() {
               { label: "Paid", count: active.filter(({ billing }) => billing.status === "PAID").length, color: "bg-emerald-500" },
               { label: "Partially paid", count: active.filter(({ billing }) => billing.status === "PARTIALLY_PAID").length, color: "bg-amber-500" },
               { label: "Overdue", count: active.filter(({ billing }) => billing.isOverdue).length, color: "bg-red-500" },
-              { label: "Sent / Viewed", count: active.filter(({ billing }) => ["SENT", "VIEWED"].includes(billing.status) && !billing.isOverdue).length, color: "bg-blue-500" },
+              { label: "Sent and Viewed", count: active.filter(({ billing }) => ["SENT", "VIEWED"].includes(billing.status) && !billing.isOverdue).length, color: "bg-blue-500" },
               { label: "Draft", count: active.filter(({ billing }) => billing.status === "DRAFT").length, color: "bg-zinc-400" },
             ].map((row) => {
               const total = Math.max(active.length, 1);
