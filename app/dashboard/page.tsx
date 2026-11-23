@@ -3,8 +3,10 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import {
   ArrowRight,
+  BellRing,
   CircleAlert,
   CircleDollarSign,
+  Clock,
   FileText,
   Plus,
   Wallet,
@@ -15,6 +17,7 @@ import { monoLabelClass } from "@/lib/utils";
 import { Money } from "@/components/invoice/money";
 import { InvoiceStatusBadge } from "@/components/invoice/invoice-status-badge";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
+import { ReminderAction } from "@/components/dashboard/reminder-action";
 
 export const instant = false;
 
@@ -24,6 +27,25 @@ function formatDate(date: Date): string {
     month: "short",
     day: "numeric",
   });
+}
+
+function formatDateTime(date: Date): string {
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function snapshotLike(value: unknown): Record<string, string> {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, v == null ? "" : String(v)]),
+    );
+  }
+  return {};
 }
 
 function toNumber(value: unknown): number {
@@ -66,7 +88,14 @@ export default async function DashboardPage() {
   const invoices = dbUser
     ? await prisma.invoice.findMany({
         where: { userId: dbUser.id },
-        include: { client: true },
+        include: {
+          client: true,
+          activities: {
+            where: { type: "REMINDER_SENT" },
+            orderBy: { createdAt: "desc" },
+            select: { id: true, createdAt: true, message: true },
+          },
+        },
         orderBy: { createdAt: "desc" },
       })
     : [];
@@ -92,6 +121,21 @@ export default async function DashboardPage() {
   const revenueData = buildRevenueData(invoices);
   const recent = computed.slice(0, 6);
   const displayCurrency = invoices[0]?.currency ?? "USD";
+  const now = new Date();
+  const inSevenDays = new Date(now);
+  inSevenDays.setDate(inSevenDays.getDate() + 7);
+  const reminderCandidates = computed
+    .filter(({ invoice, billing }) => {
+      if (!invoice.lockedAt) return false;
+      if (["VOID", "SUPERSEDED", "PAID", "DRAFT"].includes(billing.status)) return false;
+      if (billing.balanceDue <= 0) return false;
+      const due = new Date(invoice.dueDate);
+      return billing.isOverdue || (due >= new Date(now.getFullYear(), now.getMonth(), now.getDate()) && due <= inSevenDays);
+    })
+    .sort((a, b) => {
+      if (a.billing.isOverdue !== b.billing.isOverdue) return a.billing.isOverdue ? -1 : 1;
+      return new Date(a.invoice.dueDate).getTime() - new Date(b.invoice.dueDate).getTime();
+    });
 
   const metrics = [
     {
@@ -168,6 +212,83 @@ export default async function DashboardPage() {
             </article>
           );
         })}
+      </section>
+
+      <section className="mt-6 rounded-2xl border border-black/10 bg-white dark:border-white/10 dark:bg-zinc-950">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <BellRing className="size-5 text-black dark:text-white" />
+              <h2 className="text-xl font-semibold tracking-tight text-black dark:text-white">Reminders</h2>
+            </div>
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+              Overdue and due-soon invoices that may need a reminder
+            </p>
+          </div>
+          <span className="rounded-full bg-zinc-100 px-3 py-1 font-mono text-xs text-zinc-700 dark:bg-white/10 dark:text-zinc-200">
+            {reminderCandidates.length} due
+          </span>
+        </div>
+
+        {reminderCandidates.length === 0 ? (
+          <div className="border-t border-black/10 px-5 py-10 text-center dark:border-white/10">
+            <p className="text-sm text-zinc-600 dark:text-zinc-300">No overdue or due-soon invoices need reminders right now</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-black/5 border-t border-black/10 dark:divide-white/5 dark:border-white/10">
+            {reminderCandidates.map(({ invoice, billing }) => {
+              const lastReminder = invoice.activities[0];
+              const to = snapshotLike(invoice.toSnapshot);
+              const recipient = invoice.client.email ?? to.email ?? "";
+              const dueDate = new Date(invoice.dueDate);
+              return (
+                <div key={invoice.id} className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link href={`/invoices/${invoice.id}`} className="font-medium text-black underline-offset-4 hover:underline dark:text-white">
+                        {invoice.number}
+                      </Link>
+                      <InvoiceStatusBadge status={billing.status} isOverdue={billing.isOverdue} />
+                      {!billing.isOverdue && (
+                        <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wide text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
+                          Due soon
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+                      {invoice.client.name} · Due {formatDate(dueDate)} · Balance <Money value={billing.balanceDue} currency={invoice.currency} className="inline font-medium" />
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Clock className="size-3.5" />
+                        {lastReminder ? `Last reminded ${formatDateTime(lastReminder.createdAt)}` : "No reminders sent yet"}
+                      </span>
+                      {invoice.activities.length > 0 && (
+                        <details>
+                          <summary className="cursor-pointer select-none underline-offset-4 hover:underline">Reminder history ({invoice.activities.length})</summary>
+                          <ul className="mt-2 space-y-1 pl-1">
+                            {invoice.activities.map((activity) => (
+                              <li key={activity.id} className="text-xs text-zinc-600 dark:text-zinc-300">
+                                {formatDateTime(activity.createdAt)}{activity.message ? ` · ${activity.message}` : ""}
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      )}
+                    </div>
+                  </div>
+                  <div className="shrink-0">
+                    {recipient ? (
+                      <ReminderAction invoiceId={invoice.id} defaultEmail={recipient} />
+                    ) : (
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">Add client email to send reminders</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">

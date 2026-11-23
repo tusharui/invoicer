@@ -448,6 +448,7 @@ export async function sendInvoice(
       });
     });
 
+    revalidatePath('/dashboard');
     revalidatePath('/invoices');
     revalidatePath(`/invoices/${invoice.id}`);
 
