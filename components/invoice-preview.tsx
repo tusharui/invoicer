@@ -1,16 +1,65 @@
 import { Check, FileText } from "lucide-react";
 
-const items = [
-  { description: "Brand identity & logo", qty: "1", amount: "$1,200.00" },
-  { description: "Landing page design", qty: "1", amount: "$850.00" },
-  { description: "Social media kit", qty: "2", amount: "$300.00" },
-];
+export type PreviewStatus = "Paid" | "Sent" | "Draft";
+
+export type PreviewItem = {
+  description: string;
+  qty: string;
+  amount: string;
+};
+
+export type InvoicePreviewData = {
+  number: string;
+  status: PreviewStatus;
+  fromName: string;
+  fromEmail: string;
+  toName: string;
+  toEmail: string;
+  issued: string;
+  due: string;
+  items: PreviewItem[];
+  subtotal: string;
+  taxLabel: string;
+  tax: string;
+  total: string;
+};
+
+export const DEFAULT_PREVIEW: InvoicePreviewData = {
+  number: "#INV-0007",
+  status: "Paid",
+  fromName: "Northline Studio",
+  fromEmail: "hello@northline.studio",
+  toName: "Acme Co.",
+  toEmail: "billing@acme.co",
+  issued: "Nov 12, 2026",
+  due: "Nov 26, 2026",
+  items: [
+    { description: "Brand identity & logo", qty: "1", amount: "$1,200.00" },
+    { description: "Landing page design", qty: "1", amount: "$850.00" },
+    { description: "Social media kit", qty: "2", amount: "$300.00" },
+  ],
+  subtotal: "$2,350.00",
+  taxLabel: "Tax (10%)",
+  tax: "$235.00",
+  total: "$2,585.00",
+};
+
+const statusClass: Record<PreviewStatus, string> = {
+  Paid: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  Sent: "border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  Draft: "border-black/15 bg-black/5 text-zinc-600 dark:border-white/20 dark:bg-white/5 dark:text-zinc-300",
+};
 
 /**
- * A static, realistic invoice shown on the landing page so visitors can see
- * exactly what the product produces before they sign up.
+ * A realistic invoice shown on the landing page so visitors can see exactly
+ * what the product produces before they sign up. Accepts sample data so the
+ * same layout can be reused by the interactive gallery further down.
  */
-export function InvoicePreview() {
+export function InvoicePreview({
+  data = DEFAULT_PREVIEW,
+}: {
+  data?: InvoicePreviewData;
+}) {
   return (
     <div className="relative mx-auto w-full max-w-[520px] lg:mx-0">
       <div className="overflow-hidden rounded-2xl border border-black/10 bg-white dark:border-white/10 dark:bg-[#0c0c0e]">
@@ -34,11 +83,14 @@ export function InvoicePreview() {
                 Invoice
               </p>
               <p className="mt-1 text-2xl font-semibold tracking-tight text-black dark:text-white">
-                #INV-0007
+                {data.number}
               </p>
             </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-              <Check className="size-3" /> Paid
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-widest ${statusClass[data.status]}`}
+            >
+              {data.status === "Paid" ? <Check className="size-3" /> : null}
+              {data.status}
             </span>
           </div>
 
@@ -49,10 +101,10 @@ export function InvoicePreview() {
                 From
               </p>
               <p className="mt-2 text-sm font-medium text-black dark:text-white">
-                Northline Studio
+                {data.fromName}
               </p>
               <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                hello@northline.studio
+                {data.fromEmail}
               </p>
             </div>
             <div>
@@ -60,10 +112,10 @@ export function InvoicePreview() {
                 Bill to
               </p>
               <p className="mt-2 text-sm font-medium text-black dark:text-white">
-                Acme Co.
+                {data.toName}
               </p>
               <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                billing@acme.co
+                {data.toEmail}
               </p>
             </div>
           </div>
@@ -75,7 +127,7 @@ export function InvoicePreview() {
                 Issued
               </p>
               <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                Nov 12, 2026
+                {data.issued}
               </p>
             </div>
             <div>
@@ -83,7 +135,7 @@ export function InvoicePreview() {
                 Due
               </p>
               <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                Nov 26, 2026
+                {data.due}
               </p>
             </div>
           </div>
@@ -98,7 +150,7 @@ export function InvoicePreview() {
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
-              {items.map((item) => (
+              {data.items.map((item) => (
                 <tr key={item.description}>
                   <td className="py-2.5 text-zinc-700 dark:text-zinc-200">
                     {item.description}
@@ -118,24 +170,26 @@ export function InvoicePreview() {
           <div className="ml-auto mt-5 w-full max-w-[210px] space-y-2 text-xs">
             <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
               <span>Subtotal</span>
-              <span className="tabular-nums">$2,350.00</span>
+              <span className="tabular-nums">{data.subtotal}</span>
             </div>
             <div className="flex justify-between text-zinc-500 dark:text-zinc-400">
-              <span>Tax (10%)</span>
-              <span className="tabular-nums">$235.00</span>
+              <span>{data.taxLabel}</span>
+              <span className="tabular-nums">{data.tax}</span>
             </div>
             <div className="flex justify-between border-t border-black/10 pt-2 font-semibold text-black dark:border-white/10 dark:text-white">
               <span>Total</span>
-              <span className="tabular-nums">$2,585.00</span>
+              <span className="tabular-nums">{data.total}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* floating "emailed as PDF" hint */}
-      <div className="absolute -bottom-5 -right-2 hidden items-center gap-2 rounded-full border border-black/10 bg-white px-3.5 py-2 text-xs font-medium text-zinc-700 sm:flex dark:border-white/15 dark:bg-zinc-900 dark:text-zinc-200">
-        <FileText className="size-3.5" /> Emailed as PDF
-      </div>
+      {data.status !== "Draft" ? (
+        <div className="absolute -bottom-5 -right-2 hidden items-center gap-2 rounded-full border border-black/10 bg-white px-3.5 py-2 text-xs font-medium text-zinc-700 sm:flex dark:border-white/15 dark:bg-zinc-900 dark:text-zinc-200">
+          <FileText className="size-3.5" /> Emailed as PDF
+        </div>
+      ) : null}
     </div>
   );
 }
