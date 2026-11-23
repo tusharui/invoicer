@@ -31,9 +31,10 @@ A simple, modern invoicing app. Users sign in, create invoices, view them, downl
 | Route | Description |
 | --- | --- |
 | `/` | Landing page |
+| `/demo` | Public demo — create and download one invoice without signing in |
 | `/sign-in`, `/sign-up` | Clerk auth pages (redirect to `/invoices/new` after success) |
 | `/invoices` | List of the signed-in user's invoices |
-| `/invoices/new` | Create invoice form |
+| `/invoices/new` | Create invoice form (signed in) |
 | `/invoices/[id]` | Invoice detail, with **Send invoice** and **Download invoice** buttons |
 | `/dashboard` | Redirects to `/invoices` |
 

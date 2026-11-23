@@ -1,11 +1,14 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { SignUpButton } from "@clerk/nextjs";
 import {
   createInvoice,
   type CreateInvoiceState,
 } from "@/app/invoices/actions";
+import { downloadInvoicePng } from "@/components/invoice/download-invoice-button";
+import { CREATE_INVOICE_PATH } from "@/lib/routes";
 import { monoLabelClass as labelClass } from "@/lib/utils";
 
 type Item = {
@@ -19,7 +22,20 @@ type Item = {
 type Props = {
   defaultIssueDate: string;
   defaultDueDate: string;
+  mode?: "create" | "demo";
 };
+
+const DEMO_STORAGE_KEY = "invoicer_demo_generated";
+
+function formatDisplayDate(value: string): string {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
 
 const inputClass =
   "mt-1.5 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-base text-black outline-none transition-colors placeholder:text-zinc-400 focus:border-black focus-visible:ring-2 focus-visible:ring-black/10 dark:border-white/15 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white";
@@ -47,13 +63,30 @@ function money(value: number): string {
   });
 }
 
-export function CreateInvoiceForm({ defaultIssueDate, defaultDueDate }: Props) {
+export function CreateInvoiceForm({
+  defaultIssueDate,
+  defaultDueDate,
+  mode = "create",
+}: Props) {
   const [state, formAction, isPending] = useActionState<
     CreateInvoiceState,
     FormData
   >(createInvoice, {});
   const [items, setItems] = useState<Item[]>([newItem()]);
   const [discount, setDiscount] = useState("0");
+  const [demoBusy, setDemoBusy] = useState(false);
+  const [demoError, setDemoError] = useState<string | null>(null);
+  const [demoGenerated, setDemoGenerated] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (mode !== "demo") return;
+    try {
+      setDemoGenerated(localStorage.getItem(DEMO_STORAGE_KEY) === "1");
+    } catch {
+      // Ignore storage access issues; demo still works.
+    }
+  }, [mode]);
 
   const totals = useMemo(() => {
     const subtotal = items.reduce(
@@ -86,9 +119,98 @@ export function CreateInvoiceForm({ defaultIssueDate, defaultDueDate }: Props) {
     );
   }
 
+  async function handleDemoDownload() {
+    if (mode !== "demo") return;
+    setDemoError(null);
+
+    if (demoGenerated) {
+      setDemoError("You've already used your free demo invoice. Sign up to create more.");
+      return;
+    }
+
+    const form = formRef.current;
+    if (!form) return;
+    if (!form.reportValidity()) return;
+
+    const data = new FormData(form);
+    const text = (name: string) => String(data.get(name) ?? "").trim();
+    const number = text("number") || "INV-DEMO-001";
+    const issueDate = text("issueDate") || defaultIssueDate;
+    const dueDate = text("dueDate") || defaultDueDate;
+    const currency = text("currency") || "USD";
+
+    const lineItems = items
+      .map((item) => ({
+        description: item.description.trim(),
+        quantity: Number(item.quantity || 0),
+        unitPrice: Number(item.unitPrice || 0),
+        taxRate: Number(item.taxRate || 0),
+      }))
+      .filter((item) => item.description.length > 0);
+
+    if (lineItems.length === 0) {
+      setDemoError("Add at least one line item.");
+      return;
+    }
+
+    setDemoBusy(true);
+    try {
+      await downloadInvoicePng({
+        number,
+        issueDate: formatDisplayDate(issueDate),
+        dueDate: formatDisplayDate(dueDate),
+        currency,
+        from: {
+          name: text("fromName"),
+          email: text("fromEmail"),
+          addressLine1: text("fromAddress"),
+        },
+        to: {
+          name: text("clientName"),
+          company: text("clientCompany"),
+          email: text("clientEmail"),
+          addressLine1: text("clientAddress"),
+        },
+        items: lineItems.map((item) => {
+          const amount = item.quantity * item.unitPrice;
+          return {
+            description: item.description,
+            quantity: String(item.quantity),
+            unitPrice: item.unitPrice.toFixed(2),
+            taxRate: String(item.taxRate),
+            amount: amount.toFixed(2),
+          };
+        }),
+        subtotal: totals.subtotal.toFixed(2),
+        taxAmount: totals.tax.toFixed(2),
+        discountAmount: totals.discount.toFixed(2),
+        total: totals.total.toFixed(2),
+        notes: text("notes") || null,
+        terms: text("terms") || null,
+      });
+      try {
+        localStorage.setItem(DEMO_STORAGE_KEY, "1");
+      } catch {
+        // Ignore storage access issues.
+      }
+      setDemoGenerated(true);
+    } catch (err) {
+      setDemoError(
+        err instanceof Error ? err.message : "Could not download the invoice. Please try again.",
+      );
+    } finally {
+      setDemoBusy(false);
+    }
+  }
+
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form
+      ref={formRef}
+      action={mode === "create" ? formAction : undefined}
+      onSubmit={mode === "demo" ? (event) => event.preventDefault() : undefined}
+      className="space-y-6"
+    >
       <input type="hidden" name="items" value={JSON.stringify(items)} />
 
       {state.error && (
@@ -409,14 +531,58 @@ export function CreateInvoiceForm({ defaultIssueDate, defaultDueDate }: Props) {
         </section>
       </div>
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="h-10 rounded-full bg-black px-4 text-lg  text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
+      {mode === "demo" && demoError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
         >
-          {isPending ? "Creating…" : "Create invoice"}
-        </button>
+          {demoError}
+        </div>
+      )}
+
+      {mode === "demo" && demoGenerated && (
+        <div className="rounded-2xl border border-black/10 bg-zinc-50 p-5 dark:border-white/10 dark:bg-white/5">
+          <p className="text-base font-semibold text-black dark:text-white">
+            Your demo invoice is ready.
+          </p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+            Create a free account to save invoices, send them by email, and track them in one place.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <SignUpButton mode="modal" forceRedirectUrl={CREATE_INVOICE_PATH}>
+              <button
+                type="button"
+                className="inline-flex h-10 items-center rounded-full bg-black px-5 text-sm font-semibold text-white transition-opacity hover:opacity-80 dark:bg-white dark:text-black"
+              >
+                Create free account
+              </button>
+            </SignUpButton>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              No credit card required
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-end">
+        {mode === "demo" ? (
+          <button
+            type="button"
+            onClick={handleDemoDownload}
+            disabled={demoBusy || demoGenerated}
+            className="h-10 rounded-full bg-black px-4 text-lg text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
+          >
+            {demoBusy ? "Preparing…" : demoGenerated ? "Demo used" : "Download demo invoice"}
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={isPending}
+            className="h-10 rounded-full bg-black px-4 text-lg  text-white transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-black"
+          >
+            {isPending ? "Creating…" : "Create invoice"}
+          </button>
+        )}
       </div>
     </form>
   );

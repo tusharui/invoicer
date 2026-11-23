@@ -40,7 +40,7 @@ export default function Home() {
               className="hero-reveal mt-4 font-mono text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
               style={{ animationDelay: "200ms" }}
             >
-              Free to start · No credit card required
+              No sign-up needed · Free to start
             </p>
           </section>
 

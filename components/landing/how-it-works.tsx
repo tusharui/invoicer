@@ -12,16 +12,16 @@ const steps = [
   {
     number: "02",
     icon: Calculator,
-    title: "Build & send",
+    title: "Build & download",
     description:
-      "Add line items with quantity, rate and tax. Watch the total update live, then email a PDF or download a PNG.",
+      "Add line items with quantity, rate and tax. Watch the total update live, then download your invoice instantly.",
   },
   {
     number: "03",
     icon: FolderCheck,
-    title: "Stay organized",
+    title: "Save & track",
     description:
-      "Every invoice is saved in your private workspace, so you can open it again any time.",
+      "Create a free account to save invoices, send them by email, and keep everything organized in one place.",
   },
 ];
 

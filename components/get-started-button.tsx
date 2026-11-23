@@ -1,9 +1,9 @@
 "use client";
 
-import { SignUpButton, useAuth } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { CREATE_INVOICE_PATH } from "@/lib/routes";
+import { CREATE_INVOICE_PATH, DEMO_INVOICE_PATH } from "@/lib/routes";
 
 export function GetStartedButton() {
   const router = useRouter();
@@ -24,12 +24,15 @@ export function GetStartedButton() {
     );
   }
 
-  // New visitors sign up first, then land on the create-invoice screen.
+  // New visitors can try the product before creating an account.
   return (
-    <SignUpButton mode="modal" forceRedirectUrl={CREATE_INVOICE_PATH}>
-      <ShimmerButton type="button" className={className} disabled={!isLoaded}>
-        Get Started
-      </ShimmerButton>
-    </SignUpButton>
+    <ShimmerButton
+      type="button"
+      className={className}
+      disabled={!isLoaded}
+      onClick={() => router.push(DEMO_INVOICE_PATH)}
+    >
+      Try Free Demo
+    </ShimmerButton>
   );
 }
