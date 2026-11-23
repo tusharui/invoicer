@@ -11,6 +11,7 @@ import { InvoiceStatusBadge } from "@/components/invoice/invoice-status-badge";
 import { RecordPaymentForm } from "@/components/invoice/record-payment-form";
 import { PaymentsTable } from "@/components/invoice/payments-table";
 import { PaymentLinkCard } from "@/components/invoice/payment-link-card";
+import { IssueCorrectionDialog } from "@/components/invoice/issue-correction-dialog";
 
 // Reads the Clerk session (cookies) on every request.
 export const instant = false;
@@ -60,6 +61,9 @@ export default async function InvoiceDetailPage({
       items: { orderBy: { position: "asc" } },
       activities: { orderBy: { createdAt: "desc" } },
       payments: { orderBy: { paidAt: "desc" } },
+      revisions: { orderBy: { createdAt: "desc" } },
+      parentInvoice: { select: { id: true, number: true } },
+      supersededByInvoice: { select: { id: true, number: true } },
     },
   });
   if (!invoice) notFound();
@@ -105,7 +109,11 @@ export default async function InvoiceDetailPage({
           <SendInvoiceButton
             invoiceId={invoice.id}
             defaultEmail={to.email}
-            sent={invoice.status === 'SENT'}
+            sent={Boolean(invoice.lockedAt) || invoice.status !== 'DRAFT'}
+            canRemind={
+              Boolean(invoice.lockedAt) &&
+              !["VOID", "SUPERSEDED", "PAID"].includes(invoice.status)
+            }
           />
           <DownloadInvoiceButton
             number={invoice.number}
@@ -139,6 +147,27 @@ export default async function InvoiceDetailPage({
           />
         </div>
       </div>
+
+      {invoice.status === "SUPERSEDED" && (
+        <div className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+          <p className="font-semibold">This invoice was superseded</p>
+          <p className="mt-1">
+            {invoice.supersededByInvoice ? (
+              <>Replaced by <Link href={`/invoices/${invoice.supersededByInvoice.id}`} className="underline underline-offset-4">{invoice.supersededByInvoice.number}</Link>.</>
+            ) : "A replacement invoice was issued"}
+            {invoice.correctionReason ? ` Reason: ${invoice.correctionReason}` : ""}
+          </p>
+        </div>
+      )}
+
+      {invoice.parentInvoice && (
+        <div className="mt-6 rounded-2xl border border-blue-300 bg-blue-50 px-5 py-4 text-sm text-blue-900 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200">
+          <p className="font-semibold">Correction draft</p>
+          <p className="mt-1">
+            This invoice replaces <Link href={`/invoices/${invoice.parentInvoice.id}`} className="underline underline-offset-4">{invoice.parentInvoice.number}</Link>.
+          </p>
+        </div>
+      )}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
@@ -272,6 +301,44 @@ export default async function InvoiceDetailPage({
           </div>
         </dl>
       </div>
+
+      <section className="mt-8 space-y-4">
+        <p className={monoLabelClass}>History</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-black dark:text-white">
+          Activity & corrections
+        </h2>
+        <div className="overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
+          {invoice.activities.length === 0 && invoice.revisions.length === 0 ? (
+            <p className="px-5 py-4 text-sm text-zinc-600 dark:text-zinc-300">No activity yet</p>
+          ) : (
+            <ul className="divide-y divide-black/5 dark:divide-white/5">
+              {invoice.activities.map((activity) => (
+                <li key={activity.id} className="px-5 py-4 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-medium text-black dark:text-white">{activity.type.replace(/_/g, " ")}</span>
+                    <span className="text-zinc-500 dark:text-zinc-400">{formatDate(activity.createdAt)}</span>
+                  </div>
+                  {activity.message && <p className="mt-1 text-zinc-600 dark:text-zinc-300">{activity.message}</p>}
+                </li>
+              ))}
+              {invoice.revisions.map((rev) => (
+                <li key={rev.id} className="px-5 py-4 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-medium text-black dark:text-white">REVISION v{rev.version} · {rev.action}</span>
+                    <span className="text-zinc-500 dark:text-zinc-400">{formatDate(rev.createdAt)}</span>
+                  </div>
+                  {rev.reason && <p className="mt-1 text-zinc-600 dark:text-zinc-300">{rev.reason}</p>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      <IssueCorrectionDialog
+        invoiceId={invoice.id}
+        disabled={invoice.status === "DRAFT" || invoice.status === "SUPERSEDED" || invoice.status === "VOID"}
+      />
 
       <section className="mt-8 space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-4">

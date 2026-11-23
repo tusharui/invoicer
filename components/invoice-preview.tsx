@@ -29,7 +29,7 @@ export const DEFAULT_PREVIEW: InvoicePreviewData = {
   status: "Paid",
   fromName: "Northline Studio",
   fromEmail: "hello@northline.studio",
-  toName: "Acme Co.",
+  toName: "Acme Co",
   toEmail: "billing@acme.co",
   issued: "Nov 12, 2026",
   due: "Nov 26, 2026",

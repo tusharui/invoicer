@@ -45,16 +45,16 @@ const PAYMENT_METHODS = new Set([
 
 async function getOwnedInvoice(invoiceId: string) {
   const { userId: clerkId } = await auth();
-  if (!clerkId) return { error: "Please sign in." as const };
+  if (!clerkId) return { error: "Please sign in" as const };
 
   const dbUser = await prisma.user.findUnique({ where: { clerkId } });
-  if (!dbUser) return { error: "Account not found." as const };
+  if (!dbUser) return { error: "Account not found" as const };
 
   const invoice = await prisma.invoice.findFirst({
     where: { id: invoiceId, userId: dbUser.id },
     include: { payments: true },
   });
-  if (!invoice) return { error: "Invoice not found." as const };
+  if (!invoice) return { error: "Invoice not found" as const };
 
   return { dbUser, invoice };
 }
@@ -69,24 +69,24 @@ export async function recordPayment(
   formData: FormData,
 ): Promise<PaymentActionState> {
   const invoiceId = text(formData.get("invoiceId"));
-  if (!invoiceId) return { error: "Invoice not found." };
+  if (!invoiceId) return { error: "Invoice not found" };
 
   const owned = await getOwnedInvoice(invoiceId);
   if ("error" in owned) return { error: owned.error };
   const { dbUser, invoice } = owned;
 
   if (["DRAFT", "VOID", "SUPERSEDED"].includes(invoice.status)) {
-    return { error: "Payments can only be recorded for sent/active invoices." };
+    return { error: "Payments can only be recorded for sent/active invoices" };
   }
 
   const amount = parseAmount(formData.get("amount"));
   if (!Number.isFinite(amount) || amount <= 0) {
-    return { error: "Enter a valid payment amount greater than 0." };
+    return { error: "Enter a valid payment amount greater than 0" };
   }
 
   const methodRaw = text(formData.get("method")) || "OTHER";
   if (!PAYMENT_METHODS.has(methodRaw)) {
-    return { error: "Select a valid payment method." };
+    return { error: "Select a valid payment method" };
   }
   const method = methodRaw as
     | "CASH"
@@ -115,7 +115,7 @@ export async function recordPayment(
 
   if (amount > currentBilling.balanceDue) {
     return {
-      error: `Amount exceeds balance due (${currentBilling.balanceDue.toFixed(2)}).`,
+      error: `Amount exceeds balance due (${currentBilling.balanceDue.toFixed(2)})`,
     };
   }
 
@@ -178,7 +178,7 @@ export async function recordPayment(
           data: {
             invoiceId: invoice.id,
             type: "MARKED_PAID",
-            message: "Invoice marked as paid.",
+            message: "Invoice marked as paid",
           },
         });
       } else if (
@@ -189,17 +189,17 @@ export async function recordPayment(
           data: {
             invoiceId: invoice.id,
             type: "MARKED_PARTIALLY_PAID",
-            message: "Invoice marked as partially paid.",
+            message: "Invoice marked as partially paid",
           },
         });
       }
     });
 
     revalidateInvoice(invoice.id);
-    return { success: "Payment recorded." };
+    return { success: "Payment recorded" };
   } catch (error) {
     console.error("Failed to record payment", error);
-    return { error: "Could not record payment. Please try again." };
+    return { error: "Could not record payment. Please try again" };
   }
 }
 
@@ -211,19 +211,19 @@ export async function voidPayment(
   const paymentId = text(formData.get("paymentId"));
   const reason = text(formData.get("reason")) || "Voided by user";
 
-  if (!invoiceId || !paymentId) return { error: "Payment not found." };
+  if (!invoiceId || !paymentId) return { error: "Payment not found" };
 
   const owned = await getOwnedInvoice(invoiceId);
   if ("error" in owned) return { error: owned.error };
   const { invoice } = owned;
 
   if (["VOID", "SUPERSEDED"].includes(invoice.status)) {
-    return { error: "Payments cannot be changed on this invoice." };
+    return { error: "Payments cannot be changed on this invoice" };
   }
 
   const payment = invoice.payments.find((entry) => entry.id === paymentId);
-  if (!payment) return { error: "Payment not found." };
-  if (payment.status === "VOIDED") return { error: "Payment is already voided." };
+  if (!payment) return { error: "Payment not found" };
+  if (payment.status === "VOIDED") return { error: "Payment is already voided" };
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -265,7 +265,7 @@ export async function voidPayment(
         data: {
           invoiceId: invoice.id,
           type: "PAYMENT_VOIDED",
-          message: `Payment of ${Number(payment.amount).toFixed(2)} was voided.`,
+          message: `Payment of ${Number(payment.amount).toFixed(2)} was voided`,
           metadata: {
             paymentId: payment.id,
             amount: String(payment.amount),
@@ -277,10 +277,10 @@ export async function voidPayment(
     });
 
     revalidateInvoice(invoice.id);
-    return { success: "Payment voided." };
+    return { success: "Payment voided" };
   } catch (error) {
     console.error("Failed to void payment", error);
-    return { error: "Could not void payment. Please try again." };
+    return { error: "Could not void payment. Please try again" };
   }
 }
 
@@ -289,14 +289,14 @@ export async function updatePaymentUrl(
   formData: FormData,
 ): Promise<PaymentActionState> {
   const invoiceId = text(formData.get("invoiceId"));
-  if (!invoiceId) return { error: "Invoice not found." };
+  if (!invoiceId) return { error: "Invoice not found" };
 
   const owned = await getOwnedInvoice(invoiceId);
   if ("error" in owned) return { error: owned.error };
   const { invoice } = owned;
 
   if (["VOID", "SUPERSEDED"].includes(invoice.status)) {
-    return { error: "Payment link cannot be changed on this invoice." };
+    return { error: "Payment link cannot be changed on this invoice" };
   }
 
   const raw = text(formData.get("paymentUrl"));
@@ -305,11 +305,11 @@ export async function updatePaymentUrl(
     try {
       const url = new URL(raw);
       if (url.protocol !== "https:" && url.protocol !== "http:") {
-        return { error: "Enter a valid payment link (https://...)." };
+        return { error: "Enter a valid payment link (https://...)" };
       }
       paymentUrl = url.toString();
     } catch {
-      return { error: "Enter a valid payment link (https://...)." };
+      return { error: "Enter a valid payment link (https://...)" };
     }
   }
 
@@ -323,15 +323,15 @@ export async function updatePaymentUrl(
         data: {
           invoiceId: invoice.id,
           type: "PAYMENT_LINK_UPDATED",
-          message: paymentUrl ? "Payment link updated." : "Payment link removed.",
+          message: paymentUrl ? "Payment link updated" : "Payment link removed",
           metadata: { paymentUrl },
         },
       });
     });
     revalidateInvoice(invoice.id);
-    return { success: paymentUrl ? "Payment link updated." : "Payment link removed." };
+    return { success: paymentUrl ? "Payment link updated" : "Payment link removed" };
   } catch (error) {
     console.error("Failed to update payment link", error);
-    return { error: "Could not update payment link. Please try again." };
+    return { error: "Could not update payment link. Please try again" };
   }
 }

@@ -42,7 +42,7 @@ export function RecordPaymentForm({
     >
       <h3 className="text-lg font-semibold text-black dark:text-white">Record payment</h3>
       <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-        Record cash, bank transfer, or any manual payment. Balance updates automatically.
+        Record cash, bank transfer, or any manual payment. Balance updates automatically
       </p>
 
       <input type="hidden" name="invoiceId" value={invoiceId} />
@@ -93,7 +93,7 @@ export function RecordPaymentForm({
             id="reference"
             name="reference"
             className={inputClass}
-            placeholder="Transaction ID, check no."
+            placeholder="Transaction ID, check no"
           />
         </div>
       </div>

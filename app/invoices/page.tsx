@@ -55,7 +55,7 @@ export default async function InvoicesPage() {
             No invoices yet
           </h2>
           <p className="mt-2 text-base text-zinc-600 dark:text-zinc-300">
-            Create your first invoice to get started.
+            Create your first invoice to get started
           </p>
           <Link
             href="/invoices/new"

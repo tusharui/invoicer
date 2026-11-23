@@ -48,7 +48,7 @@ const WidgetCardPreview = () => {
             revenueTotal='256.24'
             planCompleted={56}
             salesPlanPercentage={54}
-            cohortDescription='Analyzes the behaviour of a group of users who joined a product/service at the same time. over a certain period.'
+            cohortDescription='Analyzes the behaviour of a group of users who joined a product/service at the same time. over a certain period'
             cohortIndicators={cohortIndicators}
           />
         </div>

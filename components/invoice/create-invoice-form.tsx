@@ -124,7 +124,7 @@ export function CreateInvoiceForm({
     setDemoError(null);
 
     if (demoGenerated) {
-      setDemoError("You've already used your free demo invoice. Sign up to create more.");
+      setDemoError("You've already used your free demo invoice. Sign up to create more");
       return;
     }
 
@@ -149,7 +149,7 @@ export function CreateInvoiceForm({
       .filter((item) => item.description.length > 0);
 
     if (lineItems.length === 0) {
-      setDemoError("Add at least one line item.");
+      setDemoError("Add at least one line item");
       return;
     }
 
@@ -196,7 +196,7 @@ export function CreateInvoiceForm({
       setDemoGenerated(true);
     } catch (err) {
       setDemoError(
-        err instanceof Error ? err.message : "Could not download the invoice. Please try again.",
+        err instanceof Error ? err.message : "Could not download the invoice. Please try again",
       );
     } finally {
       setDemoBusy(false);
@@ -402,7 +402,7 @@ export function CreateInvoiceForm({
               placeholder="https://pay.example.com/your-link"
             />
             <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              Any payment link you already have. A &quot;Pay now&quot; button will be included when you send the invoice.
+              Any payment link you already have. A &quot;Pay now&quot; button will be included when you send the invoice
             </p>
           </div>
         </div>
@@ -532,7 +532,7 @@ export function CreateInvoiceForm({
             name="notes"
             rows={4}
             className={inputClass}
-            placeholder="Thank you for your business!"
+            placeholder="Thank you for your business"
           />
         </section>
         <section className={sectionClass}>
@@ -541,7 +541,7 @@ export function CreateInvoiceForm({
             name="terms"
             rows={4}
             className={inputClass}
-            placeholder="Payment due within 14 days."
+            placeholder="Payment due within 14 days"
           />
         </section>
       </div>
@@ -558,10 +558,10 @@ export function CreateInvoiceForm({
       {mode === "demo" && demoGenerated && (
         <div className="rounded-2xl border border-black/10 bg-zinc-50 p-5 dark:border-white/10 dark:bg-white/5">
           <p className="text-base font-semibold text-black dark:text-white">
-            Your demo invoice is ready.
+            Your demo invoice is ready
           </p>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-            Create a free account to save invoices, send them by email, and track them in one place.
+            Create a free account to save invoices, send them by email, and track them in one place
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <SignUpButton mode="modal" forceRedirectUrl={CREATE_INVOICE_PATH}>

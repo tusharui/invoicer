@@ -7,21 +7,21 @@ const steps = [
     icon: FileText,
     title: "Add your details",
     description:
-      "Enter your business and client details, invoice number, and dates. Notes and terms go here too.",
+      "Enter your business and client details, invoice number, and dates. Notes and terms go here too",
   },
   {
     number: "02",
     icon: Calculator,
     title: "Build & download",
     description:
-      "Add line items with quantity, rate and tax. Watch the total update live, then download your invoice instantly.",
+      "Add line items with quantity, rate and tax. Watch the total update live, then download your invoice instantly",
   },
   {
     number: "03",
     icon: FolderCheck,
     title: "Save & track",
     description:
-      "Create a free account to save invoices, send them by email, and keep everything organized in one place.",
+      "Create a free account to save invoices, send them by email, and keep everything organized in one place",
   },
 ];
 
@@ -34,8 +34,8 @@ export function HowItWorks() {
       <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="How it works"
-          title="From blank page to sent in three steps."
-          description="No setup call, no templates to wrestle with. Just the fields you need and a clean invoice at the end."
+          title="From blank page to sent in three steps"
+          description="No setup call, no templates to wrestle with. Just the fields you need and a clean invoice at the end"
         />
 
         <div className="mt-12 grid gap-5 md:grid-cols-3">
@@ -50,14 +50,14 @@ export function HowItWorks() {
                   <span className="font-mono text-xs text-zinc-400">
                     {step.number}
                   </span>
-                  <span className="flex size-10 items-center justify-center rounded-xl border border-black/10 dark:border-white/10">
-                    <Icon className="size-5 text-black dark:text-white" />
+                  <span className="flex size-10 items-center justify-center rounded-xl border border-white/10">
+                    <Icon className="size-5 text-white" />
                   </span>
                 </div>
-                <h3 className="mt-6 text-lg font-semibold text-black dark:text-white">
+                <h3 className="mt-6 text-lg font-semibold text-white">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                <p className="mt-2 text-sm leading-6 text-zinc-300">
                   {step.description}
                 </p>
               </div>

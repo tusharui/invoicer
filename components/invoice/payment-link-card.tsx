@@ -41,7 +41,7 @@ export function PaymentLinkCard({ invoiceId, paymentUrl, disabled }: Props) {
     <div className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
       <p className={labelClass}>Payment link</p>
       <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-        Add any payment link you already have. When you send the invoice, the client gets a &quot;Pay now&quot; button.
+        Add any payment link you already have. When you send the invoice, the client gets a &quot;Pay now&quot; button
       </p>
 
       {paymentUrl ? (
@@ -64,7 +64,7 @@ export function PaymentLinkCard({ invoiceId, paymentUrl, disabled }: Props) {
           </button>
         </div>
       ) : (
-        <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No payment link added.</p>
+        <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No payment link added</p>
       )}
 
       {!disabled && (

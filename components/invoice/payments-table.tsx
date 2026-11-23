@@ -35,7 +35,7 @@ export function PaymentsTable({ invoiceId, currency, payments, canManage }: Prop
   const [error, setError] = useState<string | null>(null);
 
   async function onVoid(paymentId: string) {
-    const reason = window.prompt("Reason for voiding this payment?", "Recorded by mistake");
+    const reason = window.prompt("Reason for voiding this payment", "Recorded by mistake");
     if (reason === null) return;
     setBusyId(paymentId);
     setError(null);
@@ -51,7 +51,7 @@ export function PaymentsTable({ invoiceId, currency, payments, canManage }: Prop
   if (payments.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-black/15 px-5 py-8 text-sm text-zinc-600 dark:border-white/15 dark:text-zinc-300">
-        No payments recorded yet.
+        No payments recorded yet
       </div>
     );
   }

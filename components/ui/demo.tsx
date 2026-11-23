@@ -29,7 +29,7 @@ export default function Demo({ variant = "night" }: { variant?: string }) {
           <p
             className={`mt-3 max-w-lg text-3xl font-semibold tracking-tight sm:text-5xl ${t.light ? "text-[#1b1a17]" : "text-white"}`}
           >
-            Every sensor on the coast, in one view.
+            Every sensor on the coast, in one view
           </p>
         </div>
       </WaveMesh>

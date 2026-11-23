@@ -8,9 +8,10 @@ type Props = {
   invoiceId: string;
   defaultEmail: string;
   sent: boolean;
+  canRemind?: boolean;
 };
 
-export function SendInvoiceButton({ invoiceId, defaultEmail, sent }: Props) {
+export function SendInvoiceButton({ invoiceId, defaultEmail, sent, canRemind }: Props) {
   const [state, formAction, isPending] = useActionState<
     SendInvoiceState,
     FormData
@@ -18,7 +19,7 @@ export function SendInvoiceButton({ invoiceId, defaultEmail, sent }: Props) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState(defaultEmail);
 
-  if (sent && !state.success) {
+  if (sent && !state.success && !canRemind) {
     return (
       <span className="inline-flex h-11 items-center gap-2 rounded-full border border-black/15 px-6 text-sm font-medium text-black dark:border-white/20 dark:text-white">
         <Check className="size-4" /> Sent
@@ -34,7 +35,7 @@ export function SendInvoiceButton({ invoiceId, defaultEmail, sent }: Props) {
           onClick={() => setOpen(true)}
           className="inline-flex h-11 items-center gap-2 rounded-full border border-black/15 px-6 text-sm font-semibold text-black transition-colors hover:border-black dark:border-white/20 dark:text-white dark:hover:border-white"
         >
-          <Mail className="size-4" /> Send invoice
+          <Mail className="size-4" /> {sent || canRemind ? "Send reminder" : "Send invoice"}
         </button>
       )}
 

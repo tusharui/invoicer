@@ -8,25 +8,25 @@ import { SiteFooter } from "@/components/landing/site-footer";
 
 export default function Home() {
   return (
-    <>
+    <div className="bg-[#000000] text-white">
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center px-5 pt-8 pb-16 sm:px-8 sm:pt-10 lg:pt-12">
         <div className="grid w-full items-center gap-14 lg:grid-cols-2 lg:gap-16">
           {/* Copy */}
           <section className="flex flex-col items-center text-center lg:items-start lg:text-left">
             <h1
-              className="hero-reveal text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.045em] text-black sm:text-5xl lg:text-6xl dark:text-white"
+              className="hero-reveal text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl"
               style={{ animationDelay: "50ms" }}
             >
-              Create and send professional invoices in minutes.
+              Create and send professional invoices in minutes
             </h1>
 
             <p
-              className="hero-reveal mt-6 max-w-xl text-pretty text-base leading-7 text-zinc-600 sm:text-lg sm:leading-8 dark:text-zinc-300"
+              className="hero-reveal mt-6 max-w-xl text-pretty text-base leading-7 text-zinc-300 sm:text-lg sm:leading-8"
               style={{ animationDelay: "100ms" }}
             >
               Create professional invoices in minutes and share them with your
-              clients effortlessly. Track payments and keep everything organized
-              in one place. Simple billing without the extra hassle.
+              clients effortlessly Track payments and keep everything organized
+              in one place Simple billing without the extra hassle
             </p>
 
             <div
@@ -37,7 +37,7 @@ export default function Home() {
             </div>
 
             <p
-              className="hero-reveal mt-4 font-mono text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
+              className="hero-reveal mt-4 font-mono text-xs uppercase tracking-widest text-zinc-400"
               style={{ animationDelay: "200ms" }}
             >
               No sign-up needed · Free to start
@@ -59,6 +59,6 @@ export default function Home() {
       <SampleInvoice />
       <Faq />
       <SiteFooter />
-    </>
+    </div>
   );
 }

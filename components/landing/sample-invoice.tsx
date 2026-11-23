@@ -15,7 +15,7 @@ const samples: { label: string; data: InvoicePreviewData }[] = [
       status: "Paid",
       fromName: "Northline Studio",
       fromEmail: "hello@northline.studio",
-      toName: "Acme Co.",
+      toName: "Acme Co",
       toEmail: "billing@acme.co",
       issued: "Nov 12, 2026",
       due: "Nov 26, 2026",
@@ -85,8 +85,8 @@ export function SampleInvoice() {
       <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="Sample invoice"
-          title="See exactly what your clients will get."
-          description="Click through a few examples. Every invoice you create uses this same clean layout."
+          title="See exactly what your clients will get"
+          description="Click through a few examples. Every invoice you create uses this same clean layout"
           center
         />
 
@@ -103,9 +103,9 @@ export function SampleInvoice() {
                 role="tab"
                 aria-selected={active === index}
                 onClick={() => setActive(index)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/30 dark:focus-visible:ring-white/30 ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/30 focus-visible:ring-white/30 ${
                   active === index
-                    ? "bg-black text-white dark:bg-white dark:text-black"
+                    ? "bg-white text-black"
                     : "text-zinc-600 hover:text-black dark:text-zinc-300 dark:hover:text-white"
                 }`}
               >

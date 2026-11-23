@@ -75,12 +75,12 @@ export async function createInvoice(
   // Invoices are strictly for signed-in users — never trust the client here.
   const { userId: clerkId } = await auth();
   if (!clerkId) {
-    return { error: 'Please sign in before creating an invoice.' };
+    return { error: 'Please sign in before creating an invoice' };
   }
 
   const clientName = text(formData.get('clientName'));
   if (!clientName) {
-    return { error: 'Client name is required.' };
+    return { error: 'Client name is required' };
   }
 
   let lineItems: LineItem[] = [];
@@ -97,11 +97,11 @@ export async function createInvoice(
         .filter((item) => item.description.length > 0);
     }
   } catch {
-    return { error: 'Line items could not be read. Please try again.' };
+    return { error: 'Line items could not be read. Please try again' };
   }
 
   if (lineItems.length === 0) {
-    return { error: 'Add at least one line item.' };
+    return { error: 'Add at least one line item' };
   }
 
   const subtotal = round2(
@@ -122,7 +122,7 @@ export async function createInvoice(
 
   const paymentUrl = parsePaymentUrl(formData.get('paymentUrl'));
   if (paymentUrl === undefined) {
-    return { error: 'Enter a valid payment link (https://...).' };
+    return { error: 'Enter a valid payment link (https://...)' };
   }
 
   const clerkUser = await currentUser();
@@ -198,7 +198,7 @@ export async function createInvoice(
       where: { userId_number: { userId: dbUser.id, number: invoiceNumber } },
     });
     if (duplicate) {
-      return { error: `Invoice number "${invoiceNumber}" is already in use.` };
+      return { error: `Invoice number "${invoiceNumber}" is already in use` };
     }
 
     const invoice = await prisma.invoice.create({
@@ -247,7 +247,7 @@ export async function createInvoice(
           })),
         },
         activities: {
-          create: { type: 'CREATED', message: 'Invoice created.' },
+          create: { type: 'CREATED', message: 'Invoice created' },
         },
       },
     });
@@ -262,7 +262,7 @@ export async function createInvoice(
     invoiceId = invoice.id;
   } catch (error) {
     console.error('Failed to create invoice', error);
-    return { error: 'Could not create the invoice. Please try again.' };
+    return { error: 'Could not create the invoice. Please try again' };
   }
 
   redirect(`/invoices/${invoiceId}`);
@@ -274,21 +274,21 @@ export async function sendInvoice(
 ): Promise<SendInvoiceState> {
   const { userId: clerkId } = await auth();
   if (!clerkId) {
-    return { error: 'Please sign in to send an invoice.' };
+    return { error: 'Please sign in to send an invoice' };
   }
 
   const invoiceId = text(formData.get('invoiceId'));
   const recipient = text(formData.get('email'));
   if (!invoiceId) {
-    return { error: 'Invoice not found.' };
+    return { error: 'Invoice not found' };
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) {
-    return { error: 'Enter a valid recipient email address.' };
+    return { error: 'Enter a valid recipient email address' };
   }
 
   const dbUser = await prisma.user.findUnique({ where: { clerkId } });
   if (!dbUser) {
-    return { error: 'Account not found.' };
+    return { error: 'Account not found' };
   }
 
   const invoice = await prisma.invoice.findFirst({
@@ -296,18 +296,19 @@ export async function sendInvoice(
     include: { items: { orderBy: { position: 'asc' } } },
   });
   if (!invoice) {
-    return { error: 'Invoice not found.' };
+    return { error: 'Invoice not found' };
   }
-  if (invoice.status === 'SENT') {
-    return { error: 'This invoice has already been sent.' };
+  if (['VOID', 'SUPERSEDED', 'PAID'].includes(invoice.status)) {
+    return { error: 'This invoice cannot be sent' };
   }
+  const isReminder = Boolean(invoice.lockedAt);
 
   const gmailUser = process.env.GMAIL_USER;
   const gmailPassword = process.env.GMAIL_APP_PASSWORD;
   if (!gmailUser || !gmailPassword) {
     return {
       error:
-        'Email is not configured yet. Add GMAIL_USER and GMAIL_APP_PASSWORD to .env and restart the server.',
+        'Email is not configured yet. Add GMAIL_USER and GMAIL_APP_PASSWORD to .env and restart the server',
     };
   }
 
@@ -406,23 +407,53 @@ export async function sendInvoice(
       ],
     });
 
-    await prisma.invoice.update({
-      where: { id: invoice.id },
-      data: { status: 'SENT', sentAt: new Date() },
+    await prisma.$transaction(async (tx) => {
+      if (!isReminder) {
+        await tx.invoiceRevision.create({
+          data: {
+            invoiceId: invoice.id,
+            version: invoice.version,
+            action: "SENT",
+            reason: `Sent to ${recipient}`,
+            snapshot: {
+              snapshotVersion: 1,
+              capturedAt: new Date().toISOString(),
+              invoice: {
+                id: invoice.id,
+                number: invoice.number,
+                status: invoice.status,
+                total: String(invoice.total),
+                balanceDue: String(invoice.balanceDue),
+                amountPaid: String(invoice.amountPaid),
+                paymentUrl: invoice.paymentUrl,
+              },
+            } as object,
+          },
+        });
+      }
+
+      await tx.invoice.update({
+        where: { id: invoice.id },
+        data: isReminder
+          ? { sentAt: new Date() }
+          : { status: "SENT", sentAt: new Date(), lockedAt: invoice.lockedAt ?? new Date() },
+      });
+      await tx.invoiceActivity.create({
+        data: {
+          invoiceId: invoice.id,
+          type: isReminder ? "REMINDER_SENT" : "SENT",
+          message: isReminder ? `Reminder sent to ${recipient}.` : `Invoice sent to ${recipient}.`,
+          metadata: { recipient },
+        },
+      });
     });
-    await prisma.invoiceActivity.create({
-      data: {
-        invoiceId: invoice.id,
-        type: 'SENT',
-        message: `Invoice sent to ${recipient}.`,
-      },
-    });
+
     revalidatePath('/invoices');
     revalidatePath(`/invoices/${invoice.id}`);
 
-    return { success: `Invoice sent to ${recipient}.` };
+    return { success: isReminder ? `Reminder sent to ${recipient}.` : `Invoice sent to ${recipient}.` };
   } catch (error) {
     console.error('Failed to send invoice', error);
-    return { error: 'Could not send the invoice. Please try again.' };
+    return { error: 'Could not send the invoice. Please try again' };
   }
 }

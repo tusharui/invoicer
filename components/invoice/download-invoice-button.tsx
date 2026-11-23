@@ -174,7 +174,7 @@ export async function downloadInvoicePng(props: InvoiceDownloadData): Promise<vo
 
         canvas.toBlob((blob) => {
           if (!blob) {
-            reject(new Error("Could not create the image. Please try again."));
+            reject(new Error("Could not create the image. Please try again"));
             return;
           }
           const url = URL.createObjectURL(blob);
@@ -188,7 +188,7 @@ export async function downloadInvoicePng(props: InvoiceDownloadData): Promise<vo
           resolve();
         }, "image/png");
       } catch (error) {
-        reject(error instanceof Error ? error : new Error("Could not save the image. Please try again."));
+        reject(error instanceof Error ? error : new Error("Could not save the image. Please try again"));
       } finally {
         URL.revokeObjectURL(svgUrl);
       }
@@ -196,7 +196,7 @@ export async function downloadInvoicePng(props: InvoiceDownloadData): Promise<vo
 
     image.onerror = () => {
       URL.revokeObjectURL(svgUrl);
-      reject(new Error("Could not render the invoice. Please try again."));
+      reject(new Error("Could not render the invoice. Please try again"));
     };
 
     image.src = svgUrl;
@@ -213,7 +213,7 @@ export function DownloadInvoiceButton(props: InvoiceDownloadData) {
     try {
       await downloadInvoicePng(props);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not prepare the invoice. Please try again.");
+      setError(err instanceof Error ? err.message : "Could not prepare the invoice. Please try again");
     } finally {
       setBusy(false);
     }
