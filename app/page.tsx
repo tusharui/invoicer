@@ -1,44 +1,51 @@
-import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
-import { HeroWave } from "@/components/hero-wave";
 import { GetStartedButton } from "@/components/get-started-button";
+import { InvoicePreview } from "@/components/invoice-preview";
 
 export default function Home() {
   return (
-    <HeroWave>
-      <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col items-center justify-center px-5 py-16 text-center sm:px-8 sm:py-24">
-        <section className="flex w-full flex-col items-center text-center">
-          <span
-            className="hero-reveal inline-flex items-center gap-2 rounded-full border border-black/15 bg-white/70 px-3.5 py-1.5 font-mono text-xs uppercase tracking-widest text-zinc-600 backdrop-blur-sm dark:border-white/20 dark:bg-white/5 dark:text-zinc-300"
-            style={{ animationDelay: "0ms" }}
-          >
-            <AnimatedShinyText className="font-mono text-xs uppercase tracking-widest text-black/70 dark:text-white/80">
-              100+ Inovice Generated
-            </AnimatedShinyText>
-          </span>
-
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center px-5 pt-8 pb-16 sm:px-8 sm:pt-10 lg:pt-12">
+      <div className="grid w-full items-center gap-14 lg:grid-cols-2 lg:gap-16">
+        {/* Copy */}
+        <section className="flex flex-col items-center text-center lg:items-start lg:text-left">
           <h1
-            className="hero-reveal mt-7 text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.045em] text-black sm:text-5xl lg:text-6xl xl:text-7xl dark:text-white"
+            className="hero-reveal text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.045em] text-black sm:text-5xl lg:text-6xl dark:text-white"
             style={{ animationDelay: "50ms" }}
           >
-            Get Paid Faster With Beautiful Invoices
+            Create and send professional invoices in minutes.
           </h1>
 
           <p
             className="hero-reveal mt-6 max-w-xl text-pretty text-base leading-7 text-zinc-600 sm:text-lg sm:leading-8 dark:text-zinc-300"
             style={{ animationDelay: "100ms" }}
           >
-            Create send and track invoices in seconds No spreadsheets no
-            awkward follow-ups  just a simpler way to get paid
+            Create professional invoices in minutes and share them with your
+            clients effortlessly. Track payments and keep everything organized
+            in one place. Simple billing without the extra hassle.
           </p>
 
           <div
-            className="hero-reveal mt-10 flex w-full max-w-[280px] flex-col items-center justify-center gap-3 sm:w-auto sm:max-w-none sm:flex-row"
+            className="hero-reveal mt-10 flex w-full max-w-[280px] flex-col items-center justify-center gap-3 sm:w-auto sm:max-w-none sm:flex-row lg:items-start"
             style={{ animationDelay: "150ms" }}
           >
             <GetStartedButton />
           </div>
+
+          <p
+            className="hero-reveal mt-4 font-mono text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
+            style={{ animationDelay: "200ms" }}
+          >
+            Free to start · No credit card required
+          </p>
         </section>
-      </main>
-    </HeroWave>
+
+        {/* Product visual */}
+        <div
+          className="hero-reveal w-full"
+          style={{ animationDelay: "200ms" }}
+        >
+          <InvoicePreview />
+        </div>
+      </div>
+    </main>
   );
 }
