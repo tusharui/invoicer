@@ -1,44 +1,92 @@
-# Invoicer
+# 🧾 Invoicer
 
-A simple, modern invoicing app. Users sign in, create invoices, view them, download them as an image, and email them to clients as a PDF — all from the browser.
+> **Billing, but make it breezy.**
 
-## Features
+Invoicer is a modern invoice app that helps you go from *"ugh, I need to send an invoice"* to *"done, it's in their inbox"* without summoning a spreadsheet demon.
 
-- **Landing page** — animated hero with a dot-wave background, responsive on phone, tablet, and desktop.
-- **Authentication (Clerk)** — modal sign in / sign up on the landing page plus dedicated `/sign-in` and `/sign-up` pages. After signing in or signing up, the user is taken straight to **Create invoice**.
-- **Protected invoice area** — Clerk middleware guards every `/invoices/*` route, and each page/action checks the session again on the server. Invoices can only be created by signed-in users.
-- **Create invoice** — bill-from / bill-to details, invoice number, issue & due dates, currency, line items (quantity, rate, tax %), percentage-based discount, notes and terms, with live totals.
-- **Invoice list & detail** — browse all invoices and open a full read-only view of any invoice.
-- **Download as PNG** — exports a clean, black-and-white invoice image in Geist Mono, generated in the browser.
-- **Email as PDF** — sends the invoice to any email address with a PDF attachment via Gmail SMTP (Nodemailer). Marks the invoice as sent, records the activity, and prevents duplicate sends.
-- **Dark mode** — theme toggle in the navbar, with styling that adapts across themes.
+Create polished invoices, track payments, issue corrections, download a slick PNG, email a PDF, and keep your billing life suspiciously organized.
 
-## Tech stack
+---
 
-| Concern | Technology |
+## 🚀 The Vibe
+
+- **Fast:** make an invoice in minutes, not in an emotional journey.
+- **Clean:** sharp UI, clear totals, no clutter.
+- **Real:** auth, database, payments, PDF email, analytics - the whole grown-up stack.
+- **Fun to use:** because boring software should at least have good energy.
+
+---
+
+## 📊 Vercel Analytics (Yes, People Are Clicking)
+
+The app is live and getting traffic. Here’s the receipts:
+
+[![Invoicer Vercel Analytics snapshot](docs/vercel-analytics.svg)](https://vercel.com/tusharanshu18-gmailcoms-projects/invoicer/analytics?tab=total)
+
+| Metric (last 30 days) | Count |
+| --- | ---: |
+| Page views | **528** |
+| Unique visitors | **310** |
+
+> Snapshot pulled from Vercel Analytics for `tusharanshu18-gmailcoms-projects/invoicer`.  
+> Want the live dashboard? [Open Vercel Analytics](https://vercel.com/tusharanshu18-gmailcoms-projects/invoicer/analytics?tab=total).
+
+---
+
+## ✨ What Invoicer Can Do
+
+### For everyone
+- **Landing page with personality** - animated hero, product preview, features, FAQ, and a clean flow.
+- **Try-before-you-sign-up demo** - create and download one invoice from `/demo` without making an account.
+
+### For signed-in users
+- **Clerk authentication** - modal sign-in/sign-up and dedicated auth routes.
+- **Protected invoice workspace** - invoice routes are guarded by Clerk middleware and server-side checks.
+- **Create invoices like a pro** - bill-from/bill-to details, dates, currency, line items, tax, discount, notes, terms, and live totals.
+- **Invoice list & detail views** - browse your invoices and open a full read-only invoice page.
+- **Download as PNG** - generate a clean invoice image right in the browser.
+- **Email as PDF** - send invoices with a PDF attachment via Gmail SMTP (Nodemailer).
+- **Payment tracking** - record payments, track partial payments, and keep balance due in check.
+- **Payment links** - add your own payment URL/label so clients know where to pay.
+- **Corrections & revisions** - issue invoice corrections and keep history/audit context.
+- **Reminders & overdue flow** - nudge late payers and keep invoice status moving.
+- **Dashboard** - see your invoicing world from a higher altitude.
+
+---
+
+## 🧰 Tech Stack
+
+| Layer | Tech |
 | --- | --- |
-| Framework | Next.js 16 (App Router, Turbopack) |
+| Framework | [Next.js 16](https://nextjs.org/) (App Router, Turbopack) |
 | UI | React 19, Tailwind CSS 4, lucide-react |
-| Auth | Clerk (`@clerk/nextjs`) |
-| Database | PostgreSQL (Neon serverless) via Prisma 7 + `@prisma/adapter-neon` |
-| PDF generation | `pdfkit` |
+| Auth | [Clerk](https://clerk.com/) |
+| Database | PostgreSQL on [Neon](https://neon.tech/) |
+| ORM | Prisma 7 + `@prisma/adapter-neon` |
+| PDF | `pdfkit` |
 | Email | `nodemailer` (Gmail SMTP) |
-| Theme | `next-themes` |
+| Charts/UI bits | Recharts, Base UI, next-themes |
+| Analytics | `@vercel/analytics` |
 | Language | TypeScript |
 
-## Routes
+---
 
-| Route | Description |
+## 🗺️ Routes
+
+| Route | What happens there |
 | --- | --- |
-| `/` | Landing page |
-| `/demo` | Public demo — create and download one invoice without signing in |
-| `/sign-in`, `/sign-up` | Clerk auth pages (redirect to `/invoices/new` after success) |
-| `/invoices` | List of the signed-in user's invoices |
-| `/invoices/new` | Create invoice form (signed in) |
-| `/invoices/[id]` | Invoice detail, with **Send invoice** and **Download invoice** buttons |
-| `/dashboard` | Redirects to `/invoices` |
+| `/` | Landing page with the big "make invoices" energy |
+| `/demo` | Public demo: create/download one invoice without signing in |
+| `/sign-in` | Clerk sign-in page |
+| `/sign-up` | Clerk sign-up page |
+| `/dashboard` | Dashboard view (and `/dashboard` also redirects users into the app flow where configured) |
+| `/invoices` | Your invoice list |
+| `/invoices/new` | Create a new invoice |
+| `/invoices/[id]` | Invoice detail: view, send, download, track payments, manage actions |
 
-## Getting started
+---
+
+## 🏁 Getting Started
 
 ### 1. Install dependencies
 
@@ -46,7 +94,7 @@ A simple, modern invoicing app. Users sign in, create invoices, view them, downl
 npm install
 ```
 
-### 2. Configure environment variables
+### 2. Add environment variables
 
 Create a `.env` file in the project root:
 
@@ -67,7 +115,7 @@ GMAIL_USER=you@gmail.com
 GMAIL_APP_PASSWORD=your-16-character-app-password
 ```
 
-**Gmail App Password:** enable 2-Step Verification at https://myaccount.google.com/security, then search "App passwords" and generate one. Use that value (not your normal Gmail password) for `GMAIL_APP_PASSWORD`.
+**Gmail App Password tip:** enable 2-Step Verification at [Google Account Security](https://myaccount.google.com/security), generate an App Password, and use that value for `GMAIL_APP_PASSWORD`. Do **not** use your normal Gmail password unless you enjoy debugging auth errors.
 
 ### 3. Set up the database
 
@@ -75,52 +123,89 @@ GMAIL_APP_PASSWORD=your-16-character-app-password
 npm run db:migrate
 ```
 
-This applies the migrations in `prisma/migrations` and regenerates the Prisma Client. The datasource is Neon PostgreSQL; update `DATABASE_URL` to point at your own database if needed.
+This applies migrations in `prisma/migrations` and regenerates Prisma Client.
 
-### 4. Run the development server
+### 4. Run the dev server
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open [http://localhost:3000](http://localhost:3000) and start invoicing like you mean it.
 
-## Scripts
+---
 
-| Script | Description |
+## 📜 Scripts
+
+| Command | What it does |
 | --- | --- |
 | `npm run dev` | Start the development server |
-| `npm run build` | Regenerate the Prisma Client, then build for production |
-| `npm run start` | Start the production server |
+| `npm run build` | Generate Prisma Client and build for production |
+| `npm run start` | Run the production build |
 | `npm run lint` | Run ESLint |
-| `npm run db:generate` | Regenerate the Prisma Client |
-| `npm run db:migrate` | Create and apply a development migration |
-| `npm run db:push` | Push the schema directly to the database |
+| `npm run db:generate` | Regenerate Prisma Client |
+| `npm run db:migrate` | Create/apply dev migrations |
+| `npm run db:push` | Push schema directly to the database |
 | `npm run db:studio` | Open Prisma Studio |
 
-## Data model
+---
 
-Prisma models in `prisma/schema.prisma`:
+## 🧠 Data Model (The Serious Bit)
 
-- **User** — mirrors a Clerk user, owns businesses, clients, and invoices.
-- **Business** — the user's billing details, invoice prefix, and next invoice number.
-- **Client** — the person/company being invoiced.
-- **Invoice** — number, status (`DRAFT`/`SENT`/etc.), dates, currency, amounts, notes/terms, and JSON snapshots of the from/to details.
-- **InvoiceItem** — line items belonging to an invoice.
-- **Payment** and **InvoiceActivity** — payments and the invoice's activity timeline.
+Prisma models live in `prisma/schema.prisma`.
 
-## Deploying to Vercel
+- **User** - Clerk-backed app user; owns businesses, clients, and invoices.
+- **Business** - billing identity, invoice prefix/numbering, defaults, and bank details.
+- **Client** - who gets billed.
+- **Invoice** - the star of the show: status, dates, totals, snapshots, payment info, recurrence, corrections/supersession.
+- **InvoiceItem** - line items with quantity, pricing, tax, discount, and amount.
+- **Payment** - recorded/voided payments with method, reference, and audit fields.
+- **InvoiceActivity** - timeline of invoice events (created, sent, paid, reminded, etc.).
+- **InvoiceRevision** - versioned snapshots for invoice history/corrections.
 
-- **Framework Preset:** Next.js
-- **Root Directory:** leave blank / default (repository root — `package.json` is at the root)
-- **Build Command:** `npm run build` (runs `prisma generate && next build`, which is required because the generated Prisma Client is gitignored)
-- **Install Command:** `npm install`
-- **Node.js version:** 20.x
+---
 
-Add all the environment variables above in **Project Settings → Environment Variables** before deploying. Auth, database access, and email sending all depend on them.
+## ☁️ Deploying to Vercel
 
-## Notes
+| Setting | Value |
+| --- | --- |
+| Framework Preset | Next.js |
+| Root Directory | Repository root |
+| Build Command | `npm run build` |
+| Install Command | `npm install` |
+| Node.js | 20.x |
 
-- The generated Prisma client lives in `app/generated/prisma` and is gitignored — always regenerate it (`npm run db:generate`) after changing `prisma/schema.prisma`.
-- Invoice emails are sent from `GMAIL_USER`. Gmail's free SMTP has a daily sending limit (~500 emails/day).
-- The downloaded PNG and the emailed PDF are generated independently; both read the stored invoice snapshots so the recipient sees the same details as the creator.
+Add all required environment variables in **Project Settings → Environment Variables** before deploying.
+
+> `npm run build` runs `prisma generate && next build`, which matters because the generated Prisma Client is gitignored.
+
+---
+
+## 📝 Notes From the Trenches
+
+- Generated Prisma Client lives in `app/generated/prisma` and is **gitignored**. If you change `prisma/schema.prisma`, run `npm run db:generate`.
+- Invoice emails are sent from `GMAIL_USER`. Gmail SMTP has daily sending limits, so don't try to invoice the entire planet at once.
+- PNG and PDF outputs are generated independently, but both use stored invoice snapshots so the recipient sees the same invoice details.
+
+---
+
+## 🤝 Contributing
+
+Got an idea? Found a bug? Want to make invoices even less painful?
+
+1. Fork it.
+2. Branch it.
+3. Build it.
+4. PR it.
+
+Bonus points if your commit message has better vibes than "fix stuff".
+
+---
+
+<div align="center">
+
+**Made with TypeScript, caffeine, and a deep disrespect for messy billing.**
+
+If Invoicer saved you from one spreadsheet, it has already won.
+
+</div>
