@@ -1,8 +1,9 @@
-const links = [
+const links: { href: string; label: string; external?: boolean }[] = [
   { href: "#how-it-works", label: "How it works" },
   { href: "#features", label: "Features" },
   { href: "#sample", label: "Sample" },
   { href: "#faq", label: "FAQ" },
+  { href: "https://github.com/tusharui/invoicer", label: "GitHub", external: true },
 ];
 
 export function SiteFooter() {
@@ -22,6 +23,8 @@ export function SiteFooter() {
             <a
               key={link.href}
               href={link.href}
+              target={link.external ? "_blank" : undefined}
+              rel={link.external ? "noopener noreferrer" : undefined}
               className="text-sm text-zinc-600 underline-offset-4 hover:text-black hover:underline dark:text-zinc-300 dark:hover:text-white"
             >
               {link.label}
