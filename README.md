@@ -120,8 +120,6 @@ Prisma models are defined in `prisma/schema.prisma`
 
 ## Deployment
 
-![Vercel](public/vercel.svg)
-
 The project can be deployed on Vercel
 
 - Build command `npm run build`
